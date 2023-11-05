@@ -1,7 +1,7 @@
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
-
-import BlogLogo from '@icons/icon.svg';
+import Image from 'next/image';
+import BlogLogo from '@icons/icon.jpg';
 
 import { LanguageSelector } from '@src/components/features/language-selector';
 import { Container } from '@src/components/shared/container';
@@ -14,7 +14,7 @@ export const Header = () => {
       <nav>
         <Container className="flex items-center justify-between">
           <Link href="/" title={t('common.homepage')}>
-            <BlogLogo />
+            <Image src={BlogLogo} alt="logo" width={68} height={68} />
           </Link>
           <LanguageSelector />
         </Container>
