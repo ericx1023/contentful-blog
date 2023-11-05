@@ -1,10 +1,10 @@
 {
   "article": {
-    "relatedArticles": "Related articles",
+    "relatedArticles": "相關內容",
     "featured": "featured"
   },
   "landingPage": {
-    "latestArticles": "Latest articles"
+    "latestArticles": "最新文章"
   },
   "common": {
     "regionalSettings": "Regional Settings",
@@ -13,8 +13,8 @@
     "languageDrawer": "Toggle language drawer"
   },
   "footer": {
-    "aboutUs": "about us",
-    "description": "Our company specialises in the development of advanced technologies for a wide range of industries. We use cutting-edge techniques and algorithms to create intelligent systems that can help businesses automate tasks, improve efficiency, and drive innovation.",
+    "aboutUs": "關於我們",
+    "description": "迷幻矽谷是一個自媒體平台，旨在探討迷幻藥物在文化、藝術和心理治療方面的潛力和影響。我們希望通過分享知識、故事和創意，提高大眾對迷幻藥物的認識和理解，並促進迷幻藥物的合法化和規範化。.",
     "powerBy": "Powered by"
   },
   "notFound": {
