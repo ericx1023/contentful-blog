@@ -5,6 +5,7 @@ import { Urbanist } from 'next/font/google';
 import './utils/globals.css';
 import '@contentful/live-preview/style.css';
 import { useRouter } from 'next/router';
+import Script from 'next/script';
 
 import { Layout } from '@src/components/templates/layout';
 
@@ -16,7 +17,8 @@ const App = ({ Component, pageProps }: AppProps) => {
     <ContentfulLivePreviewProvider
       enableInspectorMode={pageProps.previewActive}
       enableLiveUpdates={pageProps.previewActive}
-      locale={locale || 'en-US'}>
+      locale={locale || 'en-US'}
+    >
       <>
         <main className={`${urbanist.variable} font-sans`}>
           <Layout>
@@ -24,6 +26,20 @@ const App = ({ Component, pageProps }: AppProps) => {
           </Layout>
         </main>
         <div id="portal" className={`${urbanist.variable} font-sans`} />
+        <Script
+          strategy="lazyOnload"
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}`}
+        />
+        <Script strategy="lazyOnload" id="GA">
+          {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}', {
+                page_path: window.location.pathname,
+                });
+            `}
+        </Script>
       </>
     </ContentfulLivePreviewProvider>
   );
