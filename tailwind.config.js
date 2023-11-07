@@ -12,7 +12,10 @@ const colors = Object.entries(tokens).reduce((acc, [key, value]) => {
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./src/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    './src/**/*.{js,ts,jsx,tsx}',
+    './src/**/**/*.{js,ts,jsx,tsx}',
+  ],
   theme: {
     colors,
     extend: {

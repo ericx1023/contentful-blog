@@ -28,7 +28,10 @@
   }
 
   p {
-    @apply text-gray600 tracking-snug font-normal leading-snug md:leading-normal;
+    @apply text-gray600 tracking-snug font-normal leading-snug md:leading-normal text-lg;
+  }
+  figcaption {
+    @apply text-center text-sm
   }
 }
 
