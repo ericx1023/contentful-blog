@@ -1,0 +1,53 @@
+fragment ReferencePageBlogPostWithEmbedFields on PageBlogPostWithEmbed {
+  __typename
+  sys {
+    id
+    spaceId
+  }
+  slug
+  author {
+    ...AuthorFields
+  }
+  publishedDate
+  title
+  shortDescription
+  featuredImage {
+    ...ImageFields
+  }
+}
+
+fragment pageBlogPostWithEmbedFields on PageBlogPostWithEmbed {
+  __typename
+  sys {
+    id
+    spaceId
+  }
+  internalName
+  seoFields {
+    ...SeoFields
+  }
+  slug
+  author {
+    ...AuthorFields
+  }
+  publishedDate
+  title
+  shortDescription
+  featuredImage {
+    ...ImageFields
+  }
+  content
+  relatedBlogPostsCollection(limit: 2) {
+    items {
+      ...ReferencePageBlogPostFields
+    }
+  }
+}
+
+query pageBlogPostWithEmbed($slug: String!, $locale: String, $preview: Boolean) {
+  pageBlogPostWithEmbedCollection(limit: 1, where: { slug: $slug }, locale: $locale, preview: $preview) {
+    items {
+      ...pageBlogPostWithEmbedFields
+    }
+  }
+}

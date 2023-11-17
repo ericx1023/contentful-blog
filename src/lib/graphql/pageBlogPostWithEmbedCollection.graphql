@@ -1,0 +1,13 @@
+query pageBlogPostWithEmbedCollection(
+  $locale: String
+  $preview: Boolean
+  $limit: Int
+  $order: [PageBlogPostWithEmbedOrder]
+  $where: PageBlogPostWithEmbedFilter
+) {
+  pageBlogPostWithEmbedCollection(limit: $limit, locale: $locale, preview: $preview, order: $order where: $where) {
+    items {
+      ...pageBlogPostWithEmbedFields
+    }
+  }
+}
