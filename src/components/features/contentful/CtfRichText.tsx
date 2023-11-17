@@ -55,6 +55,12 @@ export const contentfulBaseRichTextOptions = ({ links }: ContentfulRichTextInter
             />
           </span>
         );
+      } else {
+        return (
+          <a href={node.data.uri} target="_blank" rel="noopener noreferrer">
+            {node.content[0].nodeType === 'text' ? node.content[0].value : node.data.uri}
+          </a>
+        );
       }
     },
   },
