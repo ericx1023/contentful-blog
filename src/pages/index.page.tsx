@@ -8,7 +8,7 @@ import { getServerSideTranslations } from './utils/get-serverside-translations';
 import { ArticleHero, ArticleTileGrid } from '@src/components/features/article';
 import { SeoFields } from '@src/components/features/seo';
 import { Container } from '@src/components/shared/container';
-import { PageBlogPostOrder, PageBlogPostWithEmbedOrder } from '@src/lib/__generated/sdk';
+import { PageBlogPost, PageBlogPostOrder } from '@src/lib/__generated/sdk';
 import { client, previewClient } from '@src/lib/client';
 import { revalidateDuration } from '@src/pages/utils/constants';
 
@@ -60,7 +60,7 @@ export const getStaticProps: GetStaticProps = async ({ locale, draftMode: previe
       locale,
       order: PageBlogPostOrder.PublishedDateDesc,
       where: {
-        // slug_not: page?.featuredBlogPost?.slug,
+        slug_not: (page?.featuredBlogPost as PageBlogPost)?.slug,
       },
       preview,
     });

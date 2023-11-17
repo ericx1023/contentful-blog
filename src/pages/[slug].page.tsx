@@ -9,6 +9,7 @@ import { SeoFields } from '@src/components/features/seo';
 import { Container } from '@src/components/shared/container';
 import { client, previewClient } from '@src/lib/client';
 import { revalidateDuration } from '@src/pages/utils/constants';
+import { PageBlogPost } from '@src/lib/__generated/sdk';
 
 const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
   const { t } = useTranslation();
@@ -56,7 +57,7 @@ export const getStaticProps: GetStaticProps = async ({ params, locale, draftMode
     const blogPost = blogPageData.pageBlogPostCollection?.items[0];
     const landingPage = landingPageData.pageLandingCollection?.items[0];
 
-    const isFeatured = (landingPage?.featuredBlogPost as any)?.slug === blogPost?.slug;
+    const isFeatured = (landingPage?.featuredBlogPost as PageBlogPost)?.slug === blogPost?.slug;
 
     if (!blogPost) {
       return {

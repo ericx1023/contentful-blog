@@ -1,11 +1,10 @@
 import { documentToReactComponents, Options } from '@contentful/rich-text-react-renderer';
-import { BLOCKS, Document } from '@contentful/rich-text-types';
+import { BLOCKS, Document, INLINES } from '@contentful/rich-text-types';
 
 import { ArticleImage } from '@src/components/features/article';
 import { ComponentRichImage } from '@src/lib/__generated/sdk';
 
 export type EmbeddedEntryType = ComponentRichImage | null;
-
 export interface ContentfulRichTextInterface {
   json: Document;
   links?:
@@ -37,10 +36,37 @@ export const contentfulBaseRichTextOptions = ({ links }: ContentfulRichTextInter
 
       return <EmbeddedEntry {...entry} />;
     },
+    [INLINES.HYPERLINK]: node => {
+      if (node.data.uri.includes('player.vimeo.com/video')) {
+        return (
+          <span className="ClassNameToReplaceIframeContainer">
+            <iframe
+              title="Unique Title 001"
+              src={node.data.uri}
+              frameBorder="0"
+              allowFullScreen
+            ></iframe>
+          </span>
+        );
+      } else if (node.data.uri.includes('youtube.com/embed')) {
+        return (
+          <span className="ClassNameToReplaceIframeContainer">
+            <iframe
+              title="Unique Title 002"
+              src={node.data.uri}
+              allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
+              frameBorder="0"
+              allowFullScreen
+            ></iframe>
+          </span>
+        );
+      }
+    },
   },
 });
 
 export const CtfRichText = ({ json, links }: ContentfulRichTextInterface) => {
+  debugger;
   const baseOptions = contentfulBaseRichTextOptions({ links, json });
 
   return (
