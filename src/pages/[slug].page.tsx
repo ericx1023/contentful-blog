@@ -53,7 +53,7 @@ export const getStaticProps: GetStaticProps = async ({ params, locale, draftMode
       gqlClient.pageBlogPost({ slug: params.slug.toString(), locale, preview }),
       gqlClient.pageLanding({ locale, preview }),
     ]);
-    debugger;
+
     const blogPost = blogPageData.pageBlogPostCollection?.items[0];
     const landingPage = landingPageData.pageLandingCollection?.items[0];
 

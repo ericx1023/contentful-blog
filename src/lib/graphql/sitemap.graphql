@@ -7,15 +7,6 @@ fragment sitemapPagesFields on Query {
       }
     }
   }
-  pageBlogPostWithEmbedCollection(limit: 100, locale: $locale) {
-    items {
-      slug
-      sys {
-        publishedAt
-      }
-    }
-  }
-
   pageLandingCollection(limit: 1, locale: $locale) {
     items {
       sys {
