@@ -33,5 +33,19 @@
   figcaption {
     @apply text-center text-sm
   }
+
+  .IframeContainer {
+    padding-bottom: 56.25%;
+    position: relative;
+    display: block;
+    width: 100%;
+    > iframe {
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
 }
 

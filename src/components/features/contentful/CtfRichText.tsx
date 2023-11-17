@@ -39,25 +39,20 @@ export const contentfulBaseRichTextOptions = ({ links }: ContentfulRichTextInter
     [INLINES.HYPERLINK]: node => {
       if (node.data.uri.includes('player.vimeo.com/video')) {
         return (
-          <span className="ClassNameToReplaceIframeContainer">
-            <iframe
-              title="Unique Title 001"
-              src={node.data.uri}
-              frameBorder="0"
-              allowFullScreen
-            ></iframe>
+          <span className="IframeContainer">
+            <iframe title="Unique Title 001" src={node.data.uri} frameBorder="0" allowFullScreen />
           </span>
         );
       } else if (node.data.uri.includes('youtube.com/embed')) {
         return (
-          <span className="ClassNameToReplaceIframeContainer">
+          <span className="IframeContainer">
             <iframe
               title="Unique Title 002"
               src={node.data.uri}
               allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
               frameBorder="0"
               allowFullScreen
-            ></iframe>
+            />
           </span>
         );
       }
