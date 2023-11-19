@@ -1,7 +1,7 @@
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import Image from 'next/image';
-import BlogLogo from '@icons/icon.jpg';
+import BlogLogo from '@icons/icon2.jpeg';
 
 import { LanguageSelector } from '@src/components/features/language-selector';
 import { Container } from '@src/components/shared/container';
