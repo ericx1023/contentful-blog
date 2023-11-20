@@ -25,7 +25,6 @@ export const SeoFields = ({
       hrefLang: locale,
       href: generateUrl(locale, asPath),
     })) || [];
-
   return (
     <NextSeo
       title={pageTitle || undefined}

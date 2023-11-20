@@ -17,7 +17,7 @@ export const Header = () => {
           <Link href="/" title={t('common.homepage')}>
             <Image src={BlogLogo} alt="logo" width={68} height={68} />
           </Link>
-          <p>{t('迷幻 矽谷')}</p>
+          <p className="text-3xl font-bold">{t('迷幻 矽谷')}</p>
           <LanguageSelector />
         </Container>
       </nav>

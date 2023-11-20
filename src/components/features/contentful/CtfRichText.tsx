@@ -67,7 +67,6 @@ export const contentfulBaseRichTextOptions = ({ links }: ContentfulRichTextInter
 });
 
 export const CtfRichText = ({ json, links }: ContentfulRichTextInterface) => {
-  debugger;
   const baseOptions = contentfulBaseRichTextOptions({ links, json });
 
   return (
