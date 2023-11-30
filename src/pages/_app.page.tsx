@@ -41,6 +41,8 @@ const App = ({ Component, pageProps }: AppProps) => {
             `}
         </Script>
         <Script
+          strategy="lazyOnload"
+          id="adsense"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6674885719294263"
           crossOrigin="anonymous"
         />
