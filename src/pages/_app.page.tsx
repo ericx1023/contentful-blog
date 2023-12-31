@@ -8,7 +8,6 @@ import { useRouter } from 'next/router';
 import Script from 'next/script';
 
 import { Layout } from '@src/components/templates/layout';
-
 const urbanist = Urbanist({ subsets: ['latin'], variable: '--font-urbanist' });
 
 const App = ({ Component, pageProps }: AppProps) => {
@@ -41,11 +40,10 @@ const App = ({ Component, pageProps }: AppProps) => {
             `}
         </Script>
         <Script
-          strategy="lazyOnload"
-          id="adsense"
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6674885719294263"
-          crossOrigin="anonymous"
-        />
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6674885719294263"
+        strategy="afterInteractive"
+        crossOrigin="anonymous"
+    />
       </>
     </ContentfulLivePreviewProvider>
   );
