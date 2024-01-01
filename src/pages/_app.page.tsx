@@ -40,9 +40,6 @@ const App = ({ Component, pageProps }: AppProps) => {
             `}
         </Script>
         <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6674885719294263"
-          strategy="afterInteractive"
-          crossOrigin="anonymous"
           id="adsbygoogle"
           dangerouslySetInnerHTML={{
             __html: `
