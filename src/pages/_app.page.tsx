@@ -43,11 +43,12 @@ const App = ({ Component, pageProps }: AppProps) => {
           id="adsbygoogle"
           dangerouslySetInnerHTML={{
             __html: `
+            window.adsbygoogle = window.adsbygoogle || [];
             (adsbygoogle = window.adsbygoogle || []).push({
               google_ad_client: "ca-pub-6674885719294263",
               enable_page_level_ads: true
             });
-          `,
+              `,
           }}
         />
       </>
