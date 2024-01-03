@@ -1,4 +1,5 @@
 import { Html, Head, Main, NextScript } from 'next/document';
+import Script from 'next/script';
 
 export default function Document() {
   return (
@@ -13,6 +14,17 @@ export default function Document() {
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="msapplication-config" content="/favicons/browserconfig.xml" />
         <meta name="theme-color" content="#ffffff" />
+        <Script
+          async
+          id="Adsense-id"
+          data-ad-client="ca-pub-6674885719294263"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
+          strategy="lazyOnload"
+        />
+        <Script
+          strategy="lazyOnload"
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}`}
+        />
       </Head>
       <body>
         <Main />
