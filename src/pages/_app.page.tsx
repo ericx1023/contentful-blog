@@ -5,7 +5,7 @@ import { Urbanist } from 'next/font/google';
 import './utils/globals.css';
 import '@contentful/live-preview/style.css';
 import { useRouter } from 'next/router';
-import Script from 'next/script';
+import Head from 'next/head';
 
 import { Layout } from '@src/components/templates/layout';
 const urbanist = Urbanist({ subsets: ['latin'], variable: '--font-urbanist' });
@@ -18,6 +18,9 @@ const App = ({ Component, pageProps }: AppProps) => {
       enableLiveUpdates={pageProps.previewActive}
       locale={locale || 'en-US'}
     >
+      <Head>
+        <title>迷幻矽谷</title>
+      </Head>
       <>
         <main className={`${urbanist.variable} font-sans`}>
           <Layout>
