@@ -27,6 +27,7 @@ module.exports = {
     "plugin:react/recommended",
     "plugin:jsx-a11y/recommended",
     "plugin:@next/next/recommended",
+    "next",
   ],
   rules: {
     "@typescript-eslint/no-var-requires": "off",
