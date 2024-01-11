@@ -3,6 +3,7 @@ import { Html, Head, Main, NextScript } from 'next/document';
 import Script from 'next/script';
 
 export default function Document() {
+  debugger;
   return (
     <Html lang="en">
       <Head>
@@ -32,9 +33,9 @@ export default function Document() {
         />
       </Head>
       <body>
+        <Analytics />
         <Main />
         <NextScript />
-        <Analytics />
       </body>
     </Html>
   );
