@@ -1,6 +1,11 @@
 import { GraphQLClient } from 'graphql-request';
-import { getSdk } from './__generated/sdk';
-import { PageBlogPostWithHtml } from './__generated/sdk';
+import {
+  getSdk,
+  PageBlogPostWithHtml,
+  PageBlogPostWithHtmlQuery,
+  PageBlogPostWithHtmlFieldsFragment,
+  PageBlogPostWithHtmlCollectionQuery,
+} from './__generated/sdk';
 
 // 擴展 SDK 類型以包含我們的新查詢
 export interface ExtendedSdk extends ReturnType<typeof getSdk> {
@@ -8,11 +13,7 @@ export interface ExtendedSdk extends ReturnType<typeof getSdk> {
     slug: string;
     locale?: string;
     preview?: boolean;
-  }) => Promise<{
-    pageBlogPostWithHtmlCollection?: {
-      items: Array<PageBlogPostWithHtml | null>;
-    } | null;
-  }>;
+  }) => Promise<PageBlogPostWithHtmlQuery>;
 
   pageBlogPostWithHtmlCollection: (variables?: {
     locale?: string;
@@ -20,11 +21,7 @@ export interface ExtendedSdk extends ReturnType<typeof getSdk> {
     limit?: number;
     order?: any;
     where?: any;
-  }) => Promise<{
-    pageBlogPostWithHtmlCollection?: {
-      items: Array<PageBlogPostWithHtml | null>;
-    } | null;
-  }>;
+  }) => Promise<PageBlogPostWithHtmlCollectionQuery>;
 }
 
 // 手動實現查詢函數
@@ -37,9 +34,11 @@ const createExtendedSdk = (client: GraphQLClient): ExtendedSdk => {
       const query = `
         query pageBlogPostWithHtml($slug: String!, $locale: String, $preview: Boolean) {
           pageBlogPostWithHtmlCollection(limit: 1, where: { slug: $slug }, locale: $locale, preview: $preview) {
+            __typename
             items {
               __typename
               sys {
+                __typename
                 id
                 spaceId
                 publishedAt
@@ -50,16 +49,27 @@ const createExtendedSdk = (client: GraphQLClient): ExtendedSdk => {
               title
               html
               author {
+                __typename
                 sys { id }
                 name
                 avatar {
+                  __typename
+                  sys { id }
+                  title
+                  description
                   url
+                  contentType
                   width
                   height
                 }
               }
               featuredImage {
+                __typename
+                sys { id }
+                title
+                description
                 url
+                contentType
                 width
                 height
               }
@@ -75,9 +85,11 @@ const createExtendedSdk = (client: GraphQLClient): ExtendedSdk => {
       const query = `
         query pageBlogPostWithHtmlCollection($locale: String, $preview: Boolean, $limit: Int, $order: [PageBlogPostWithHtmlOrder], $where: PageBlogPostWithHtmlFilter) {
           pageBlogPostWithHtmlCollection(limit: $limit, locale: $locale, preview: $preview, order: $order, where: $where) {
+            __typename
             items {
               __typename
               sys {
+                __typename
                 id
                 spaceId
                 publishedAt
@@ -88,16 +100,27 @@ const createExtendedSdk = (client: GraphQLClient): ExtendedSdk => {
               title
               html
               author {
+                __typename
                 sys { id }
                 name
                 avatar {
+                  __typename
+                  sys { id }
+                  title
+                  description
                   url
+                  contentType
                   width
                   height
                 }
               }
               featuredImage {
+                __typename
+                sys { id }
+                title
+                description
                 url
+                contentType
                 width
                 height
               }
