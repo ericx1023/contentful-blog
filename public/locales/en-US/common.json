@@ -10,7 +10,8 @@
     "regionalSettings": "Regional Settings",
     "homepage": "迷幻矽谷",
     "language": "Language",
-    "languageDrawer": "Toggle language drawer"
+    "languageDrawer": "Toggle language drawer",
+    "backToList": "返回列表"
   },
   "footer": {
     "aboutUs": "關於我們",

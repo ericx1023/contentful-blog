@@ -1,0 +1,13 @@
+query pageBlogPostWithHtmlCollection(
+  $locale: String
+  $preview: Boolean
+  $limit: Int
+  $order: [PageBlogPostWithHtmlOrder]
+  $where: PageBlogPostWithHtmlFilter
+) {
+  pageBlogPostWithHtmlCollection(limit: $limit, locale: $locale, preview: $preview, order: $order, where: $where) {
+    items {
+      ...PageBlogPostWithHtmlFields
+    }
+  }
+}

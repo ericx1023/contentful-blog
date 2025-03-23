@@ -1,0 +1,27 @@
+fragment PageBlogPostWithHtmlFields on PageBlogPostWithHtml {
+  __typename
+  sys {
+    id
+    spaceId
+    publishedAt
+    firstPublishedAt
+  }
+  internalName
+  slug
+  title
+  html
+  author {
+    ...AuthorFields
+  }
+  featuredImage {
+    ...ImageFields
+  }
+}
+
+query pageBlogPostWithHtml($slug: String!, $locale: String, $preview: Boolean) {
+  pageBlogPostWithHtmlCollection(limit: 1, where: { slug: $slug }, locale: $locale, preview: $preview) {
+    items {
+      ...PageBlogPostWithHtmlFields
+    }
+  }
+}

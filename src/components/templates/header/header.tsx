@@ -17,7 +17,11 @@ export const Header = () => {
           <Link href="/" title={t('common.homepage')}>
             <Image src={BlogLogo} alt="logo" width={68} height={68} />
           </Link>
-          <p className="text-3xl font-bold">{t('迷幻矽谷')}</p>
+          <div className="flex items-center space-x-6">
+            <Link href="/" className="text-lg font-medium hover:underline">
+              {t('common.homepage')}
+            </Link>
+          </div>
           <LanguageSelector />
         </Container>
       </nav>

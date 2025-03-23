@@ -1,6 +1,7 @@
 import { GraphQLClient } from 'graphql-request';
 
 import { getSdk } from '@src/lib/__generated/sdk';
+import { createExtendedSdk } from './extended-sdk';
 import { endpoint } from 'codegen';
 
 const graphQlClient = new GraphQLClient(endpoint, {
@@ -15,5 +16,5 @@ const previewGraphQlClient = new GraphQLClient(endpoint, {
   },
 });
 
-export const client = getSdk(graphQlClient);
-export const previewClient = getSdk(previewGraphQlClient);
+export const client = createExtendedSdk(graphQlClient);
+export const previewClient = createExtendedSdk(previewGraphQlClient);
