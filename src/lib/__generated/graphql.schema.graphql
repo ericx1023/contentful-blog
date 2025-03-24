@@ -1,10 +1,5 @@
 directive @contentSourceMaps on QUERY
 
-"""
-Indicates exactly one field must be supplied and this field must not be `null`.
-"""
-directive @oneOf on INPUT_OBJECT
-
 """Represents a binary file in a space. An asset can be any file type."""
 type Asset {
   contentType(locale: String): String

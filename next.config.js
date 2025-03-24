@@ -32,6 +32,7 @@ module.exports = withPlugins(plugins, {
     // urlImports: true,
     // concurrentFeatures: true,
     // serverComponents: true,
+    // dir: 'src',
   },
 
   /**

@@ -1,0 +1,25 @@
+{
+  "article": {
+    "relatedArticles": "相關內容",
+    "featured": "推薦"
+  },
+  "landingPage": {
+    "latestArticles": "最新文章"
+  },
+  "common": {
+    "regionalSettings": "地區設置",
+    "homepage": "迷幻矽谷",
+    "language": "語言",
+    "languageDrawer": "切換語言選項",
+    "backToList": "返回列表"
+  },
+  "footer": {
+    "aboutUs": "關於我們",
+    "description": "迷幻矽谷是一個自媒體平台，旨在探討迷幻藥物在文化、藝術和心理治療方面的潛力和影響。我們希望通過分享知識、故事和創意，提高大眾對迷幻藥物的認識和理解，並促進迷幻藥物的合法化和規範化。",
+    "powerBy": "技術支持"
+  },
+  "notFound": {
+    "title": "找不到頁面",
+    "description": "此頁面似乎不存在。<0>點擊這裡</0>返回首頁。"
+  }
+}
