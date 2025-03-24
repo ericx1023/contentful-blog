@@ -3,35 +3,48 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --shadow-subtle: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+    --shadow-medium: 0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-elevated: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+    --border-radius-sm: 0.25rem;
+    --border-radius-md: 0.375rem;
+    --border-radius-lg: 0.5rem;
+  }
+
   body {
-    @apply text-sm text-gray800 md:text-sm bg-gray100;
+    @apply text-sm text-gray-darkest md:text-sm bg-white;
   }
 
   .h1,
   h1 {
-    @apply text-xl leading-tighter font-semibold md:text-4xl;
+    @apply text-xl leading-tighter font-semibold md:text-4xl text-blue-dark;
   }
 
   .h2,
   h2 {
-    @apply text-xl leading-tight font-semibold md:text-3xl;
+    @apply text-xl leading-tight font-semibold md:text-3xl text-blue-dark;
   }
 
   .h3,
   h3 {
-    @apply text-base leading-relaxed font-semibold md:text-xl;
+    @apply text-base leading-relaxed font-semibold md:text-xl text-blue-medium;
   }
 
   .h4,
   h4 {
-    @apply text-xs leading-normal font-semibold md:text-base;
+    @apply text-xs leading-normal font-semibold md:text-base text-blue-medium;
   }
 
   p {
-    @apply text-gray600 tracking-snug font-normal leading-snug md:leading-normal text-lg;
+    @apply text-gray-dark tracking-snug font-normal leading-snug md:leading-normal text-lg;
   }
   figcaption {
-    @apply text-center text-sm
+    @apply text-center text-sm text-gray-medium italic;
+  }
+
+  a {
+    @apply text-blue-medium hover:text-blue-light transition-colors duration-200;
   }
 
   .IframeContainer {
@@ -46,6 +59,32 @@
       top: 0;
       left: 0;
     }
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white p-6 rounded-md shadow-medium border border-gray-lightest;
+  }
+
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-blue-medium text-white hover:bg-blue-dark;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-lightest text-gray-dark hover:bg-gray-light;
+  }
+
+  .section {
+    @apply py-12 md:py-16;
+  }
+
+  .container-narrow {
+    @apply max-w-4xl mx-auto px-4;
   }
 }
 

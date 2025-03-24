@@ -87,22 +87,22 @@ export const LanguageSelectorDesktop = ({ localeName, displayName }) => {
         aria-haspopup="true"
         aria-expanded={isOpen}
         aria-controls="menu-locale"
-        className="flex items-center font-normal uppercase"
+        className="flex items-center font-normal uppercase text-white transition-colors duration-200 hover:text-gray-lightest"
         onClick={() => setIsOpen(currentState => !currentState)}
       >
-        <LanguageIcon width="18px" height="18px" variant="secondary" className="mr-1 ml-1" />
+        <LanguageIcon width="18px" height="18px" className="mr-1 ml-1 text-white" variant="white" />
         {localeName(router.locale)}
         {isOpen ? (
-          <ChevronUpTrimmedIcon variant="secondary" className="pl-1" />
+          <ChevronUpTrimmedIcon className="pl-1 text-white" variant="white" />
         ) : (
-          <ChevronDownTrimmedIcon variant="secondary" className="pl-1" />
+          <ChevronDownTrimmedIcon className="pl-1 text-white" variant="white" />
         )}
       </button>
       <FocusLock disabled={!isOpen} returnFocus={true}>
         <ul
           ref={menuRef}
           className={twMerge(
-            'top-100 absolute right-0 z-10 w-24 translate-y-3 cursor-pointer rounded-md bg-colorWhite text-center text-base shadow',
+            'top-100 absolute right-0 z-10 w-24 translate-y-3 cursor-pointer rounded-md border border-gray-lightest bg-white text-center text-base shadow-medium',
             isOpen ? 'block' : 'hidden',
           )}
           id="menu-locale"
@@ -114,7 +114,7 @@ export const LanguageSelectorDesktop = ({ localeName, displayName }) => {
               <Link
                 onKeyDown={e => handleMenuItemKeydown(e, index)}
                 role="menuitem"
-                className="block py-2"
+                className="block py-2 transition-colors duration-200 hover:bg-blue-light hover:text-white"
                 href={{
                   pathname: router.pathname,
                   query: router.query,

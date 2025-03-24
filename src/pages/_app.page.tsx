@@ -1,5 +1,5 @@
 import { ContentfulLivePreviewProvider } from '@contentful/live-preview/react';
-import { appWithTranslation } from 'next-i18next';
+import { appWithTranslation, useTranslation } from 'next-i18next';
 import type { AppProps } from 'next/app';
 import { Urbanist } from 'next/font/google';
 import './utils/globals.css';
@@ -11,6 +11,8 @@ import { Layout } from '@src/components/templates/layout';
 const urbanist = Urbanist({ subsets: ['latin'], variable: '--font-urbanist' });
 
 const App = ({ Component, pageProps }: AppProps) => {
+  const { t } = useTranslation();
+
   const { locale } = useRouter();
   return (
     <ContentfulLivePreviewProvider
@@ -19,7 +21,7 @@ const App = ({ Component, pageProps }: AppProps) => {
       locale={locale || 'en-US'}
     >
       <Head>
-        <title>迷幻矽谷</title>
+        <title>{t('common.homepage')}</title>
       </Head>
       <>
         <main className={`${urbanist.variable} font-sans`}>
