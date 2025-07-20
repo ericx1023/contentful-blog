@@ -1,5 +1,20 @@
 directive @contentSourceMaps on QUERY
 
+directive @delegatedResourceLink(contentTypeId: String, field: JSON) on FIELD_DEFINITION | OBJECT
+
+directive @enumMapper(value: JSON) on ENUM_VALUE
+
+directive @featureFlag(featureName: String) on FIELD
+
+directive @fieldResolver(data: JSON, kind: String) on FIELD_DEFINITION
+
+"""
+Indicates exactly one field must be supplied and this field must not be `null`.
+"""
+directive @oneOf on INPUT_OBJECT
+
+directive @typeIdentifier(contentTypeId: String) on OBJECT
+
 """Represents a binary file in a space. An asset can be any file type."""
 type Asset {
   contentType(locale: String): String
@@ -124,7 +139,7 @@ enum AssetOrder {
 }
 
 """
-To have author-related properties [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor)
+[See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor)
 """
 type ComponentAuthor implements Entry & _Node {
   _id: ID!
@@ -197,6 +212,8 @@ enum ComponentAuthorLinkingCollectionsPageBlogPostWithHtmlCollectionOrder {
   publishedAt_DESC
   slug_ASC
   slug_DESC
+  sourceUrl_ASC
+  sourceUrl_DESC
   sys_firstPublishedAt_ASC
   sys_firstPublishedAt_DESC
   sys_id_ASC
@@ -225,7 +242,7 @@ enum ComponentAuthorOrder {
 }
 
 """
-To describe an image used in rich text fields [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage)
+[See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage)
 """
 type ComponentRichImage implements Entry & _Node {
   _id: ID!
@@ -292,7 +309,7 @@ enum ComponentRichImageOrder {
 }
 
 """
-To have SEO-related properties to the pages we render [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo)
+[See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo)
 """
 type ComponentSeo implements Entry & _Node {
   _id: ID!
@@ -503,6 +520,7 @@ enum EntryOrder {
 scalar HexColor
 
 enum ImageFormat {
+  """AVIF image format."""
   AVIF
 
   """JPG image format."""
@@ -636,7 +654,7 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 scalar JSON
 
 """
-To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost)
+[See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost)
 """
 type PageBlogPost implements Entry & _Node {
   _id: ID!
@@ -840,7 +858,7 @@ enum PageBlogPostRelatedBlogPostsCollectionOrder {
 }
 
 """
-To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml)
+[See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml)
 """
 type PageBlogPostWithHtml implements Entry & _Node {
   _id: ID!
@@ -852,6 +870,7 @@ type PageBlogPostWithHtml implements Entry & _Node {
   linkedFrom(allowedLocales: [String]): PageBlogPostWithHtmlLinkingCollections
   publishedAt(locale: String): DateTime
   slug(locale: String): String
+  sourceUrl(locale: String): String
   sys: Sys!
   title(locale: String): String
 }
@@ -900,6 +919,13 @@ input PageBlogPostWithHtmlFilter {
   slug_not: String
   slug_not_contains: String
   slug_not_in: [String]
+  sourceUrl: String
+  sourceUrl_contains: String
+  sourceUrl_exists: Boolean
+  sourceUrl_in: [String]
+  sourceUrl_not: String
+  sourceUrl_not_contains: String
+  sourceUrl_not_in: [String]
   sys: SysFilter
   title: String
   title_contains: String
@@ -921,6 +947,8 @@ enum PageBlogPostWithHtmlOrder {
   publishedAt_DESC
   slug_ASC
   slug_DESC
+  sourceUrl_ASC
+  sourceUrl_DESC
   sys_firstPublishedAt_ASC
   sys_firstPublishedAt_DESC
   sys_id_ASC
@@ -934,7 +962,7 @@ enum PageBlogPostWithHtmlOrder {
 }
 
 """
-To have an entry point for the app (e.g. Homepage) [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding)
+[See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding)
 """
 type PageLanding implements Entry & _Node {
   _id: ID!
@@ -996,6 +1024,7 @@ scalar Quality
 
 type Query {
   _node(id: ID!, locale: String, preview: Boolean): _Node
+  _nodes(ids: [ID!]!, locale: String, preview: Boolean): [_Node]!
   asset(id: String!, locale: String, preview: Boolean): Asset
   assetCollection(limit: Int = 100, locale: String, order: [AssetOrder], preview: Boolean, skip: Int = 0, where: AssetFilter): AssetCollection
   componentAuthor(id: String!, locale: String, preview: Boolean): ComponentAuthor

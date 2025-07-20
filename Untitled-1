@@ -1,0 +1,12 @@
+export default function AlertCard(breachedAccounts) {
+  let account = breachedAccounts.breachedAccounts
+  console.log(account)
+  return (
+    <div>
+      <div>Alert</div>
+      {Array.isArray(account) && account.map(acc => {
+        return <div key={acc.id}>{acc.name}</div>
+      })}
+    </div>
+  );
+}

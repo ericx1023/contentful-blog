@@ -249,7 +249,7 @@ export enum AssetOrder {
   WidthDesc = 'width_DESC'
 }
 
-/** To have author-related properties [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor) */
 export type ComponentAuthor = Entry & _Node & {
   __typename?: 'ComponentAuthor';
   _id: Scalars['ID'];
@@ -262,26 +262,26 @@ export type ComponentAuthor = Entry & _Node & {
 };
 
 
-/** To have author-related properties [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor) */
 export type ComponentAuthorAvatarArgs = {
   locale?: InputMaybe<Scalars['String']>;
   preview?: InputMaybe<Scalars['Boolean']>;
 };
 
 
-/** To have author-related properties [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor) */
 export type ComponentAuthorInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To have author-related properties [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor) */
 export type ComponentAuthorLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
 
-/** To have author-related properties [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentAuthor) */
 export type ComponentAuthorNameArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
@@ -375,6 +375,8 @@ export enum ComponentAuthorLinkingCollectionsPageBlogPostWithHtmlCollectionOrder
   PublishedAtDesc = 'publishedAt_DESC',
   SlugAsc = 'slug_ASC',
   SlugDesc = 'slug_DESC',
+  SourceUrlAsc = 'sourceUrl_ASC',
+  SourceUrlDesc = 'sourceUrl_DESC',
   SysFirstPublishedAtAsc = 'sys_firstPublishedAt_ASC',
   SysFirstPublishedAtDesc = 'sys_firstPublishedAt_DESC',
   SysIdAsc = 'sys_id_ASC',
@@ -402,7 +404,7 @@ export enum ComponentAuthorOrder {
   SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
-/** To describe an image used in rich text fields [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
 export type ComponentRichImage = Entry & _Node & {
   __typename?: 'ComponentRichImage';
   _id: Scalars['ID'];
@@ -416,32 +418,32 @@ export type ComponentRichImage = Entry & _Node & {
 };
 
 
-/** To describe an image used in rich text fields [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
 export type ComponentRichImageCaptionArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To describe an image used in rich text fields [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
 export type ComponentRichImageFullWidthArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To describe an image used in rich text fields [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
 export type ComponentRichImageImageArgs = {
   locale?: InputMaybe<Scalars['String']>;
   preview?: InputMaybe<Scalars['Boolean']>;
 };
 
 
-/** To describe an image used in rich text fields [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
 export type ComponentRichImageInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To describe an image used in rich text fields [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentRichImage) */
 export type ComponentRichImageLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
@@ -509,7 +511,7 @@ export enum ComponentRichImageOrder {
   SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
-/** To have SEO-related properties to the pages we render [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
 export type ComponentSeo = Entry & _Node & {
   __typename?: 'ComponentSeo';
   _id: Scalars['ID'];
@@ -526,49 +528,49 @@ export type ComponentSeo = Entry & _Node & {
 };
 
 
-/** To have SEO-related properties to the pages we render [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
 export type ComponentSeoCanonicalUrlArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To have SEO-related properties to the pages we render [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
 export type ComponentSeoInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To have SEO-related properties to the pages we render [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
 export type ComponentSeoLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
 
-/** To have SEO-related properties to the pages we render [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
 export type ComponentSeoNofollowArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To have SEO-related properties to the pages we render [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
 export type ComponentSeoNoindexArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To have SEO-related properties to the pages we render [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
 export type ComponentSeoPageDescriptionArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To have SEO-related properties to the pages we render [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
 export type ComponentSeoPageTitleArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To have SEO-related properties to the pages we render [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/componentSeo) */
 export type ComponentSeoShareImagesCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']>;
   locale?: InputMaybe<Scalars['String']>;
@@ -786,6 +788,7 @@ export enum EntryOrder {
 }
 
 export enum ImageFormat {
+  /** AVIF image format. */
   Avif = 'AVIF',
   /** JPG image format. */
   Jpg = 'JPG',
@@ -880,7 +883,7 @@ export type ImageTransformOptions = {
   width?: InputMaybe<Scalars['Dimension']>;
 };
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPost = Entry & _Node & {
   __typename?: 'PageBlogPost';
   _id: Scalars['ID'];
@@ -900,7 +903,7 @@ export type PageBlogPost = Entry & _Node & {
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostAuthorArgs = {
   locale?: InputMaybe<Scalars['String']>;
   preview?: InputMaybe<Scalars['Boolean']>;
@@ -908,38 +911,38 @@ export type PageBlogPostAuthorArgs = {
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostContentArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostFeaturedImageArgs = {
   locale?: InputMaybe<Scalars['String']>;
   preview?: InputMaybe<Scalars['Boolean']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostPublishedDateArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostRelatedBlogPostsCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']>;
   locale?: InputMaybe<Scalars['String']>;
@@ -950,7 +953,7 @@ export type PageBlogPostRelatedBlogPostsCollectionArgs = {
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostSeoFieldsArgs = {
   locale?: InputMaybe<Scalars['String']>;
   preview?: InputMaybe<Scalars['Boolean']>;
@@ -958,19 +961,19 @@ export type PageBlogPostSeoFieldsArgs = {
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostShortDescriptionArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostSlugArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostTitleArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
@@ -1196,7 +1199,7 @@ export enum PageBlogPostRelatedBlogPostsCollectionOrder {
   TitleDesc = 'title_DESC'
 }
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
 export type PageBlogPostWithHtml = Entry & _Node & {
   __typename?: 'PageBlogPostWithHtml';
   _id: Scalars['ID'];
@@ -1208,12 +1211,13 @@ export type PageBlogPostWithHtml = Entry & _Node & {
   linkedFrom?: Maybe<PageBlogPostWithHtmlLinkingCollections>;
   publishedAt?: Maybe<Scalars['DateTime']>;
   slug?: Maybe<Scalars['String']>;
+  sourceUrl?: Maybe<Scalars['String']>;
   sys: Sys;
   title?: Maybe<Scalars['String']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
 export type PageBlogPostWithHtmlAuthorArgs = {
   locale?: InputMaybe<Scalars['String']>;
   preview?: InputMaybe<Scalars['Boolean']>;
@@ -1221,44 +1225,50 @@ export type PageBlogPostWithHtmlAuthorArgs = {
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
 export type PageBlogPostWithHtmlFeaturedImageArgs = {
   locale?: InputMaybe<Scalars['String']>;
   preview?: InputMaybe<Scalars['Boolean']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
 export type PageBlogPostWithHtmlHtmlArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
 export type PageBlogPostWithHtmlInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
 export type PageBlogPostWithHtmlLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
 export type PageBlogPostWithHtmlPublishedAtArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
 export type PageBlogPostWithHtmlSlugArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To create individual blog posts [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
+export type PageBlogPostWithHtmlSourceUrlArgs = {
+  locale?: InputMaybe<Scalars['String']>;
+};
+
+
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPostWithHtml) */
 export type PageBlogPostWithHtmlTitleArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
@@ -1308,6 +1318,13 @@ export type PageBlogPostWithHtmlFilter = {
   slug_not?: InputMaybe<Scalars['String']>;
   slug_not_contains?: InputMaybe<Scalars['String']>;
   slug_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  sourceUrl?: InputMaybe<Scalars['String']>;
+  sourceUrl_contains?: InputMaybe<Scalars['String']>;
+  sourceUrl_exists?: InputMaybe<Scalars['Boolean']>;
+  sourceUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  sourceUrl_not?: InputMaybe<Scalars['String']>;
+  sourceUrl_not_contains?: InputMaybe<Scalars['String']>;
+  sourceUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   sys?: InputMaybe<SysFilter>;
   title?: InputMaybe<Scalars['String']>;
   title_contains?: InputMaybe<Scalars['String']>;
@@ -1338,6 +1355,8 @@ export enum PageBlogPostWithHtmlOrder {
   PublishedAtDesc = 'publishedAt_DESC',
   SlugAsc = 'slug_ASC',
   SlugDesc = 'slug_DESC',
+  SourceUrlAsc = 'sourceUrl_ASC',
+  SourceUrlDesc = 'sourceUrl_DESC',
   SysFirstPublishedAtAsc = 'sys_firstPublishedAt_ASC',
   SysFirstPublishedAtDesc = 'sys_firstPublishedAt_DESC',
   SysIdAsc = 'sys_id_ASC',
@@ -1350,7 +1369,7 @@ export enum PageBlogPostWithHtmlOrder {
   TitleDesc = 'title_DESC'
 }
 
-/** To have an entry point for the app (e.g. Homepage) [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding) */
 export type PageLanding = Entry & _Node & {
   __typename?: 'PageLanding';
   _id: Scalars['ID'];
@@ -1363,26 +1382,26 @@ export type PageLanding = Entry & _Node & {
 };
 
 
-/** To have an entry point for the app (e.g. Homepage) [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding) */
 export type PageLandingFeaturedBlogPostArgs = {
   locale?: InputMaybe<Scalars['String']>;
   preview?: InputMaybe<Scalars['Boolean']>;
 };
 
 
-/** To have an entry point for the app (e.g. Homepage) [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding) */
 export type PageLandingInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
 
-/** To have an entry point for the app (e.g. Homepage) [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding) */
 export type PageLandingLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
 
-/** To have an entry point for the app (e.g. Homepage) [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding) */
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageLanding) */
 export type PageLandingSeoFieldsArgs = {
   locale?: InputMaybe<Scalars['String']>;
   preview?: InputMaybe<Scalars['Boolean']>;
@@ -1445,6 +1464,7 @@ export enum PageLandingOrder {
 export type Query = {
   __typename?: 'Query';
   _node?: Maybe<_Node>;
+  _nodes: Array<Maybe<_Node>>;
   asset?: Maybe<Asset>;
   assetCollection?: Maybe<AssetCollection>;
   componentAuthor?: Maybe<ComponentAuthor>;
@@ -1465,6 +1485,13 @@ export type Query = {
 
 export type Query_NodeArgs = {
   id: Scalars['ID'];
+  locale?: InputMaybe<Scalars['String']>;
+  preview?: InputMaybe<Scalars['Boolean']>;
+};
+
+
+export type Query_NodesArgs = {
+  ids: Array<Scalars['ID']>;
   locale?: InputMaybe<Scalars['String']>;
   preview?: InputMaybe<Scalars['Boolean']>;
 };
@@ -1843,7 +1870,7 @@ export type PageBlogPostCollectionQuery = { __typename?: 'Query', pageBlogPostCo
       & PageBlogPostFieldsFragment
     ) | null> } | null };
 
-export type PageBlogPostWithHtmlFieldsFragment = { __typename: 'PageBlogPostWithHtml', internalName?: string | null, slug?: string | null, title?: string | null, html?: string | null, sys: { __typename?: 'Sys', id: string, spaceId: string, publishedAt?: any | null, firstPublishedAt?: any | null }, author?: (
+export type PageBlogPostWithHtmlFieldsFragment = { __typename: 'PageBlogPostWithHtml', internalName?: string | null, slug?: string | null, title?: string | null, html?: string | null, sourceUrl?: string | null, sys: { __typename?: 'Sys', id: string, spaceId: string, publishedAt?: any | null, firstPublishedAt?: any | null }, author?: (
     { __typename?: 'ComponentAuthor' }
     & AuthorFieldsFragment
   ) | null, featuredImage?: (
@@ -2054,6 +2081,7 @@ export const PageBlogPostWithHtmlFieldsFragmentDoc = gql`
   slug
   title
   html
+  sourceUrl
   author {
     ...AuthorFields
   }

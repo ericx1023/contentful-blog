@@ -10,6 +10,7 @@ fragment PageBlogPostWithHtmlFields on PageBlogPostWithHtml {
   slug
   title
   html
+  sourceUrl
   author {
     ...AuthorFields
   }

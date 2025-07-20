@@ -48,6 +48,7 @@ const createExtendedSdk = (client: GraphQLClient): ExtendedSdk => {
               slug
               title
               html
+              sourceUrl
               author {
                 __typename
                 sys { id }
@@ -99,6 +100,7 @@ const createExtendedSdk = (client: GraphQLClient): ExtendedSdk => {
               slug
               title
               html
+              sourceUrl
               author {
                 __typename
                 sys { id }

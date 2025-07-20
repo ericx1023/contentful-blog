@@ -80,13 +80,30 @@ const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
           <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
             {post.html || ''}
           </ReactMarkdown>
+
+          {/* Source Link - Check if sourceUrl exists in post data */}
+          {(post as any).sourceUrl && (
+            <div className="border-gray-200 mt-8 border-t pt-6">
+              <p className="text-gray-600 text-sm">
+                Source:{' '}
+                <a
+                  href={(post as any).sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  {(post as any).sourceUrl}
+                </a>
+              </p>
+            </div>
+          )}
         </div>
       </Container>
 
       <Container className="my-12 max-w-4xl">
         <button
           onClick={() => router.back()}
-          className="bg-blue-600 text-white hover:bg-blue-700 mt-8 rounded-md px-4 py-2"
+          className="bg-blue-600 hover:bg-blue-700 mt-8 rounded-md px-4 py-2 text-white"
         >
           ← {t('common.backToList')}
         </button>
