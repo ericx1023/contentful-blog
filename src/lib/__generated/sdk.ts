@@ -1817,6 +1817,11 @@ export type AuthorFieldsFragment = { __typename: 'ComponentAuthor', name?: strin
     & ImageFieldsFragment
   ) | null };
 
+export type PageBlogPostWithHtmlEmbedFieldsFragment = { __typename: 'PageBlogPostWithHtml', sourceUrl?: string | null, title?: string | null, sys: { __typename?: 'Sys', id: string }, featuredImage?: (
+    { __typename?: 'Asset' }
+    & ImageFieldsFragment
+  ) | null };
+
 export type ImageFieldsFragment = { __typename: 'Asset', title?: string | null, description?: string | null, width?: number | null, height?: number | null, url?: string | null, contentType?: string | null, sys: { __typename?: 'Sys', id: string } };
 
 export type ReferencePageBlogPostFieldsFragment = { __typename: 'PageBlogPost', slug?: string | null, publishedDate?: any | null, title?: string | null, shortDescription?: string | null, sys: { __typename?: 'Sys', id: string, spaceId: string }, author?: (
@@ -1839,7 +1844,10 @@ export type PageBlogPostFieldsFragment = { __typename: 'PageBlogPost', internalN
   ) | null, content?: { __typename?: 'PageBlogPostContent', json: any, links: { __typename?: 'PageBlogPostContentLinks', entries: { __typename?: 'PageBlogPostContentEntries', block: Array<{ __typename?: 'ComponentAuthor' } | (
           { __typename?: 'ComponentRichImage' }
           & RichImageFieldsFragment
-        ) | { __typename?: 'ComponentSeo' } | { __typename?: 'PageBlogPost' } | { __typename?: 'PageBlogPostWithHtml' } | { __typename?: 'PageLanding' } | null> } } } | null, relatedBlogPostsCollection?: { __typename?: 'PageBlogPostRelatedBlogPostsCollection', items: Array<(
+        ) | { __typename?: 'ComponentSeo' } | { __typename?: 'PageBlogPost' } | (
+          { __typename?: 'PageBlogPostWithHtml' }
+          & PageBlogPostWithHtmlEmbedFieldsFragment
+        ) | { __typename?: 'PageLanding' } | null> } } } | null, relatedBlogPostsCollection?: { __typename?: 'PageBlogPostRelatedBlogPostsCollection', items: Array<(
       { __typename?: 'PageBlogPost' }
       & ReferencePageBlogPostFieldsFragment
     ) | null> } | null };
@@ -2011,6 +2019,19 @@ export const RichImageFieldsFragmentDoc = gql`
   fullWidth
 }
     `;
+export const PageBlogPostWithHtmlEmbedFieldsFragmentDoc = gql`
+    fragment PageBlogPostWithHtmlEmbedFields on PageBlogPostWithHtml {
+  __typename
+  sys {
+    id
+  }
+  sourceUrl
+  title
+  featuredImage {
+    ...ImageFields
+  }
+}
+    `;
 export const ReferencePageBlogPostFieldsFragmentDoc = gql`
     fragment ReferencePageBlogPostFields on PageBlogPost {
   __typename
@@ -2057,6 +2078,7 @@ export const PageBlogPostFieldsFragmentDoc = gql`
       entries {
         block {
           ...RichImageFields
+          ...PageBlogPostWithHtmlEmbedFields
         }
       }
     }
@@ -2143,6 +2165,7 @@ ${SeoFieldsFragmentDoc}
 ${ImageFieldsFragmentDoc}
 ${AuthorFieldsFragmentDoc}
 ${RichImageFieldsFragmentDoc}
+${PageBlogPostWithHtmlEmbedFieldsFragmentDoc}
 ${ReferencePageBlogPostFieldsFragmentDoc}`;
 export const PageBlogPostCollectionDocument = gql`
     query pageBlogPostCollection($locale: String, $preview: Boolean, $limit: Int, $order: [PageBlogPostOrder], $where: PageBlogPostFilter) {
@@ -2163,6 +2186,7 @@ ${SeoFieldsFragmentDoc}
 ${ImageFieldsFragmentDoc}
 ${AuthorFieldsFragmentDoc}
 ${RichImageFieldsFragmentDoc}
+${PageBlogPostWithHtmlEmbedFieldsFragmentDoc}
 ${ReferencePageBlogPostFieldsFragmentDoc}`;
 export const PageBlogPostWithHtmlDocument = gql`
     query pageBlogPostWithHtml($slug: String!, $locale: String, $preview: Boolean) {

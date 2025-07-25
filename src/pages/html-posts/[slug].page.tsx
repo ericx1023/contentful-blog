@@ -12,6 +12,7 @@ import { getServerSideTranslations } from '../utils/get-serverside-translations'
 
 import { Container } from '@src/components/shared/container';
 import { FormatDate } from '@src/components/shared/format-date';
+import { CtfEmbed } from '@src/components/features/contentful/CtfEmbed';
 import { client, previewClient } from '@src/lib/client';
 import { revalidateDuration } from '@src/pages/utils/constants';
 
@@ -81,20 +82,10 @@ const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
             {post.html || ''}
           </ReactMarkdown>
 
-          {/* Source Link - Check if sourceUrl exists in post data */}
-          {(post as any).sourceUrl && (
+          {/* Rich Embed - Check if sourceUrl exists in post data */}
+          {post.sourceUrl && (
             <div className="border-gray-200 mt-8 border-t pt-6">
-              <p className="text-gray-600 text-sm">
-                Source:{' '}
-                <a
-                  href={(post as any).sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline"
-                >
-                  {(post as any).sourceUrl}
-                </a>
-              </p>
+              <CtfEmbed embed={post} />
             </div>
           )}
         </div>
@@ -146,7 +137,7 @@ export const getStaticProps: GetStaticProps = async ({ params, locale, draftMode
         post,
       },
     };
-  } catch {
+  } catch (error) {
     return {
       notFound: true,
       revalidate: revalidateDuration,

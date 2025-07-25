@@ -3,8 +3,15 @@ import { BLOCKS, Document, INLINES } from '@contentful/rich-text-types';
 
 import { ArticleImage } from '@src/components/features/article';
 import { ComponentRichImage } from '@src/lib/__generated/sdk';
+import { CtfEmbed } from './CtfEmbed';
 
-export type EmbeddedEntryType = ComponentRichImage | null;
+export type EmbeddedEntryType =
+  | ComponentRichImage
+  | Pick<
+      import('@src/lib/__generated/sdk').PageBlogPostWithHtml,
+      '__typename' | 'sys' | 'sourceUrl' | 'title' | 'featuredImage'
+    >
+  | null;
 export interface ContentfulRichTextInterface {
   json: Document;
   links?:
@@ -20,6 +27,8 @@ export const EmbeddedEntry = (entry: EmbeddedEntryType) => {
   switch (entry?.__typename) {
     case 'ComponentRichImage':
       return <ArticleImage image={entry} />;
+    case 'PageBlogPostWithHtml':
+      return <CtfEmbed embed={entry} />;
     default:
       return null;
   }

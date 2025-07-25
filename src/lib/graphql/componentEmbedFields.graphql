@@ -1,0 +1,11 @@
+fragment PageBlogPostWithHtmlEmbedFields on PageBlogPostWithHtml {
+  __typename
+  sys {
+    id
+  }
+  sourceUrl
+  title
+  featuredImage {
+    ...ImageFields
+  }
+}
