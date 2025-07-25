@@ -22,7 +22,7 @@ const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
     <>
       <Head>
-        <title>Markdown 部落格文章 | 迷幻矽谷</title>
+        <title>Markdown 部落格文章 | {t('common.homepage')}</title>
         <meta name="description" content="使用 Markdown 撰寫的部落格文章列表" />
       </Head>
 

@@ -29,7 +29,9 @@ const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
     <>
       <Head>
-        <title>{post.title} | 迷幻矽谷</title>
+        <title>
+          {post.title} | {t('common.homepage')}
+        </title>
         <meta name="description" content={post.internalName || ''} />
       </Head>
 

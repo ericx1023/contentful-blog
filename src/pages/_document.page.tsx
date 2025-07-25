@@ -9,7 +9,7 @@ export default function Document() {
       <Head>
         <meta
           name="description"
-          content="迷幻矽谷 psychevalley 是一個關注啟靈藥，迷幻藥，科技，心理健康的社群媒體平台。我們的目標是提供一個安全，開放，友善的環境，讓使用者分享他們的經驗，學習新知，探索自我，了解未來的發展趨勢和相關資訊。我們相信啟靈藥可以幫助人們打破思維的框架，創造更美好的未來"
+          content="台灣啟靈意識研究學會是一個關注啟靈藥，迷幻藥，科技，心理健康的研究組織。我們的目標是提供一個安全，開放，友善的環境，讓使用者分享他們的經驗，學習新知，探索自我，了解未來的發展趨勢和相關資訊。我們相信啟靈藥可以幫助人們打破思維的框架，創造更美好的未來"
         />
         <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
