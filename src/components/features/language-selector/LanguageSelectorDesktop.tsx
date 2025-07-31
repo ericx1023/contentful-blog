@@ -87,11 +87,11 @@ export const LanguageSelectorDesktop = ({ localeName, displayName }) => {
         aria-haspopup="true"
         aria-expanded={isOpen}
         aria-controls="menu-locale"
-        className="flex items-center font-normal uppercase text-white transition-colors duration-200 hover:text-gray-lightest"
+        className="flex items-center font-normal text-white transition-colors duration-200 hover:text-gray-lightest"
         onClick={() => setIsOpen(currentState => !currentState)}
       >
         <LanguageIcon width="18px" height="18px" className="mr-1 ml-1 text-white" variant="white" />
-        {localeName(router.locale)}
+        {displayName(router.locale).of(localeName(router.locale))}
         {isOpen ? (
           <ChevronUpTrimmedIcon className="pl-1 text-white" variant="white" />
         ) : (
