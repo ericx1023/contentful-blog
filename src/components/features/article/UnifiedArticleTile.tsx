@@ -68,7 +68,7 @@ export const UnifiedArticleTile = ({ article, className }: UnifiedArticleTilePro
                   : 'bg-green-100 text-green-800'
               }`}
             >
-              {articleType === ArticleType.MARKDOWN ? 'Markdown' : '標準'}
+              {/* {articleType === ArticleType.MARKDOWN ? 'Markdown' : '標準'} */}
             </span>
           </div>
 

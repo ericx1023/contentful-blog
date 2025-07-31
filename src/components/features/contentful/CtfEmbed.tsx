@@ -2,6 +2,25 @@ import { useContentfulLiveUpdates } from '@contentful/live-preview/react';
 
 import { PageBlogPostWithHtml, Asset } from '@src/lib/__generated/sdk';
 
+// Helper function to validate URL
+const validateUrl = (url: string): boolean => {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// Helper function to safely get hostname
+const getSafeHostname = (url: string): string => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return 'Invalid URL';
+  }
+};
+
 interface EmbedProps {
   sourceUrl: string;
   title?: string;
@@ -13,6 +32,40 @@ interface PageBlogPostWithHtmlEmbedProps {
 }
 
 const EmbedRenderer = ({ sourceUrl, title, featuredImage }: EmbedProps) => {
+  // Early return if URL is invalid
+  if (!validateUrl(sourceUrl)) {
+    return (
+      <div className="not-prose border-gray-200 my-6 overflow-hidden rounded-lg border bg-white shadow-sm">
+        <div className="p-4">
+          <div className="from-red-50 to-orange-100 mb-4 flex aspect-video w-full items-center justify-center rounded-lg bg-gradient-to-br">
+            <div className="text-center">
+              <div className="bg-red-500 mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-lg">
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <p className="text-red-600 text-sm">Invalid URL</p>
+            </div>
+          </div>
+          {title && <h3 className="text-gray-900 line-clamp-2 mb-2 font-semibold">{title}</h3>}
+          <div className="text-gray-500 text-xs">
+            <span className="truncate">{sourceUrl}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Handle different types of embeds
   const isYouTube = sourceUrl.includes('youtube.com') || sourceUrl.includes('youtu.be');
   const isVimeo = sourceUrl.includes('vimeo.com');
@@ -85,6 +138,8 @@ const EmbedRenderer = ({ sourceUrl, title, featuredImage }: EmbedProps) => {
   }
 
   // Generic embed with rich preview (fallback)
+  const hostname = getSafeHostname(sourceUrl);
+
   return (
     <div className="not-prose border-gray-200 my-6 overflow-hidden rounded-lg border bg-white shadow-sm">
       <a
@@ -128,7 +183,7 @@ const EmbedRenderer = ({ sourceUrl, title, featuredImage }: EmbedProps) => {
           {title && <h3 className="text-gray-900 line-clamp-2 mb-2 font-semibold">{title}</h3>}
           <div className="flex items-center justify-between">
             <div className="text-gray-500 flex items-center text-xs">
-              <span className="truncate">{new URL(sourceUrl).hostname}</span>
+              <span className="truncate">{hostname}</span>
             </div>
             <div className="text-blue-600 text-xs font-medium">View Article →</div>
           </div>
