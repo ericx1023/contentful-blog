@@ -3,10 +3,27 @@ import { Html, Head, Main, NextScript } from 'next/document';
 import Script from 'next/script';
 
 export default function Document() {
-  debugger;
   return (
-    <Html lang="en">
+    <Html lang="en" className="dark">
       <Head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme') || 'dark';
+                  var resolvedTheme = theme === 'system' 
+                    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                    : theme;
+                  document.documentElement.classList.remove('light', 'dark');
+                  document.documentElement.classList.add(resolvedTheme);
+                } catch (e) {
+                  document.documentElement.classList.add('dark');
+                }
+              })();
+            `,
+          }}
+        />
         <meta
           name="description"
           content="台灣啟靈意識研究站是一個致力於報導啟靈藥物在文化、藝術和心理治療方面的潛力和影響的網站。我們希望通過分享知識、故事和討論，提高大眾對啟靈意識的認識和理解，並促進台灣研究的發展。"

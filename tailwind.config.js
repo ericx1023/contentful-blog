@@ -38,16 +38,41 @@ const professionalColors = {
   'info': '#1565C0',
 };
 
+// 深色模式色系
+const darkModeColors = {
+  // 深色背景
+  'bg-primary-dark': '#0A0A0A',
+  'bg-secondary-dark': '#1A1A1A',
+  'bg-tertiary-dark': '#2D2D2D',
+  'bg-card-dark': '#1F1F1F',
+  
+  // 深色文字
+  'text-primary-dark': '#FFFFFF',
+  'text-secondary-dark': '#E0E0E0',
+  'text-muted-dark': '#A0A0A0',
+  
+  // 深色邊框
+  'border-dark': '#3F3F3F',
+  'border-light-dark': '#555555',
+  
+  // 深色強調色
+  'accent-blue-dark': '#64B5F6',
+  'accent-teal-dark': '#4DD0E1',
+  'accent-warm-dark': '#FFAB91',
+};
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     './src/**/*.{js,ts,jsx,tsx}',
     './src/**/**/*.{js,ts,jsx,tsx}',
   ],
+  darkMode: 'class',
   theme: {
     colors: {
       ...contentfulColors,
       ...professionalColors,
+      ...darkModeColors,
       // 保留基本色彩
       white: '#FFFFFF',
       black: '#000000',

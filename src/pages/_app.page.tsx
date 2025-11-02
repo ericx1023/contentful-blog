@@ -8,6 +8,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 
 import { Layout } from '@src/components/templates/layout';
+import { ThemeProvider } from '@src/contexts/ThemeContext';
 const urbanist = Urbanist({ subsets: ['latin'], variable: '--font-urbanist' });
 
 const App = ({ Component, pageProps }: AppProps) => {
@@ -15,23 +16,25 @@ const App = ({ Component, pageProps }: AppProps) => {
 
   const { locale } = useRouter();
   return (
-    <ContentfulLivePreviewProvider
-      enableInspectorMode={pageProps.previewActive}
-      enableLiveUpdates={pageProps.previewActive}
-      locale={locale || 'en-US'}
-    >
-      <Head>
-        <title>{t('common.homepage')}</title>
-      </Head>
-      <>
-        <main className={`${urbanist.variable} font-sans`}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        </main>
-        <div id="portal" className={`${urbanist.variable} font-sans`} />
-      </>
-    </ContentfulLivePreviewProvider>
+    <ThemeProvider>
+      <ContentfulLivePreviewProvider
+        enableInspectorMode={pageProps.previewActive}
+        enableLiveUpdates={pageProps.previewActive}
+        locale={locale || 'en-US'}
+      >
+        <Head>
+          <title>{t('common.homepage')}</title>
+        </Head>
+        <>
+          <main className={`${urbanist.variable} font-sans`}>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </main>
+          <div id="portal" className={`${urbanist.variable} font-sans`} />
+        </>
+      </ContentfulLivePreviewProvider>
+    </ThemeProvider>
   );
 };
 

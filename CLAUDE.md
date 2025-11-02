@@ -20,7 +20,8 @@ This is a Next.js blog application powered by Contentful CMS. It supports both s
 - `yarn graphql-codegen:watch` - Watch mode for GraphQL generation (runs on `.graphql` file changes)
 
 ### Setup
-- `yarn setup` - Run initial setup script (requires environment variables)
+- `yarn setup` - Run initial setup script that copies .env.example to .env and starts dev server
+- `yarn` - Install dependencies (requires Node.js v18+ as specified in .nvmrc)
 
 ## Environment Variables
 

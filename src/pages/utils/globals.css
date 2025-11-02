@@ -12,39 +12,43 @@
     --border-radius-lg: 0.5rem;
   }
 
+  html {
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
   body {
-    @apply text-sm text-gray-darkest md:text-sm bg-white;
+    @apply text-sm text-gray-darkest dark:text-text-primary-dark md:text-sm bg-white dark:bg-bg-primary-dark transition-colors duration-200;
   }
 
   .h1,
   h1 {
-    @apply text-xl leading-tighter font-semibold md:text-4xl text-blue-dark;
+    @apply text-xl leading-tighter font-semibold md:text-4xl text-blue-dark dark:text-accent-blue-dark;
   }
 
   .h2,
   h2 {
-    @apply text-xl leading-tight font-semibold md:text-3xl text-blue-dark;
+    @apply text-xl leading-tight font-semibold md:text-3xl text-blue-dark dark:text-accent-blue-dark;
   }
 
   .h3,
   h3 {
-    @apply text-base leading-relaxed font-semibold md:text-xl text-blue-medium;
+    @apply text-base leading-relaxed font-semibold md:text-xl text-blue-medium dark:text-accent-blue-dark;
   }
 
   .h4,
   h4 {
-    @apply text-xs leading-normal font-semibold md:text-base text-blue-medium;
+    @apply text-xs leading-normal font-semibold md:text-base text-blue-medium dark:text-accent-blue-dark;
   }
 
   p {
-    @apply text-gray-dark tracking-snug font-normal leading-snug md:leading-normal text-lg;
+    @apply text-gray-dark dark:text-text-secondary-dark tracking-snug font-normal leading-snug md:leading-normal text-lg;
   }
   figcaption {
-    @apply text-center text-sm text-gray-medium italic;
+    @apply text-center text-sm text-gray-medium dark:text-text-muted-dark italic;
   }
 
   a {
-    @apply text-blue-medium hover:text-blue-light transition-colors duration-200;
+    @apply text-blue-medium dark:text-accent-blue-dark hover:text-blue-light dark:hover:text-accent-teal-dark transition-colors duration-200;
   }
 
   .IframeContainer {
@@ -52,19 +56,20 @@
     position: relative;
     display: block;
     width: 100%;
-    > iframe {
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
+  }
+  
+  .IframeContainer iframe {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-white p-6 rounded-md shadow-medium border border-gray-lightest;
+    @apply bg-white dark:bg-bg-card-dark p-6 rounded-md shadow-medium dark:shadow-none border border-gray-lightest dark:border-border-dark;
   }
 
   .btn {
@@ -72,11 +77,11 @@
   }
 
   .btn-primary {
-    @apply bg-blue-medium text-white hover:bg-blue-dark;
+    @apply bg-blue-medium dark:bg-accent-blue-dark text-white hover:bg-blue-dark dark:hover:bg-blue-medium;
   }
 
   .btn-secondary {
-    @apply bg-gray-lightest text-gray-dark hover:bg-gray-light;
+    @apply bg-gray-lightest dark:bg-bg-tertiary-dark text-gray-dark dark:text-text-primary-dark hover:bg-gray-light dark:hover:bg-bg-secondary-dark;
   }
 
   .section {

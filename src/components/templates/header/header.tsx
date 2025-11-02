@@ -6,13 +6,14 @@ import BlogLogo from '@icons/TAPSC.png';
 
 import { LanguageSelector } from '@src/components/features/language-selector';
 import { Container } from '@src/components/shared/container';
+import { ThemeToggle } from '@src/components/shared/theme-toggle';
 
 export const Header = () => {
   const { t } = useTranslation();
   const router = useRouter();
 
   return (
-    <header className="border-b border-blue-medium bg-gradient-to-r from-blue-dark to-accent-slate py-4 text-white shadow-medium">
+    <header className=" border-blue-medium bg-gradient-to-r from-blue-dark to-accent-slate py-4 text-white shadow-medium dark:border-border-dark dark:from-bg-secondary-dark dark:text-text-primary-dark">
       <nav>
         <Container className="flex items-center justify-between">
           <Link href="/" title={t('common.homepage')}>
@@ -27,14 +28,17 @@ export const Header = () => {
           <div className="flex items-center space-x-8">
             <Link
               href="/"
-              className={`text-2xl font-medium text-white transition-colors duration-200 hover:text-gray-lightest ${
+              className={`text-2xl font-medium text-white transition-colors duration-200 hover:text-gray-lightest dark:text-text-primary-dark dark:hover:text-text-secondary-dark ${
                 router.locale === 'zh-Hant-TW' ? 'tracking-widest' : ''
               }`}
             >
               {t('common.homepage')}
             </Link>
           </div>
-          <LanguageSelector />
+          <div className="flex items-center space-x-4">
+            <ThemeToggle />
+            <LanguageSelector />
+          </div>
         </Container>
       </nav>
     </header>

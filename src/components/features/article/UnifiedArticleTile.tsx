@@ -46,7 +46,7 @@ export const UnifiedArticleTile = ({ article, className }: UnifiedArticleTilePro
     <Link className="flex flex-col" href={articlePath}>
       <div
         className={twMerge(
-          'flex flex-1 flex-col overflow-hidden rounded-2xl border border-gray300 shadow-lg',
+          'flex flex-1 flex-col overflow-hidden rounded-2xl border border-gray300 bg-white shadow-lg transition-colors duration-200 dark:border-border-dark dark:bg-bg-card-dark dark:shadow-none',
           className,
         )}
       >
@@ -64,8 +64,8 @@ export const UnifiedArticleTile = ({ article, className }: UnifiedArticleTilePro
             <span
               className={`rounded py-1 px-2 text-xs font-medium ${
                 articleType === ArticleType.MARKDOWN
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-green-100 text-green-800'
+                  ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+                  : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
               }`}
             >
               {/* {articleType === ArticleType.MARKDOWN ? 'Markdown' : '標準'} */}
@@ -73,7 +73,10 @@ export const UnifiedArticleTile = ({ article, className }: UnifiedArticleTilePro
           </div>
 
           {title && (
-            <p className="h3 mb-2 text-gray800 md:mb-3" {...inspectorProps('title')}>
+            <p
+              className="h3 mb-2 text-gray800 dark:text-text-primary-dark md:mb-3"
+              {...inspectorProps('title')}
+            >
               {title}
             </p>
           )}
@@ -85,7 +88,10 @@ export const UnifiedArticleTile = ({ article, className }: UnifiedArticleTilePro
             {/* 如果有發布日期則顯示 */}
             {publishedDate && (
               <div
-                className={twMerge(hasAuthor ? 'ml-auto pl-2' : '', 'text-xs text-gray600')}
+                className={twMerge(
+                  hasAuthor ? 'ml-auto pl-2' : '',
+                  'text-xs text-gray600 dark:text-text-muted-dark',
+                )}
                 {...inspectorProps('publishedDate')}
               >
                 <FormatDate date={publishedDate ? new Date(publishedDate) : undefined} />
