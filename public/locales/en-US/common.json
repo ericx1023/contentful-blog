@@ -1,7 +1,8 @@
 {
   "article": {
     "relatedArticles": "Related Content",
-    "featured": "Featured"
+    "featured": "Featured",
+    "comments": "Comments"
   },
   "landingPage": {
     "latestArticles": "Latest Articles"

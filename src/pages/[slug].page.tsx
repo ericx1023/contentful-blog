@@ -6,6 +6,7 @@ import { getServerSideTranslations } from './utils/get-serverside-translations';
 
 import { ArticleContent, ArticleHero, ArticleTileGrid } from '@src/components/features/article';
 import { SeoFields } from '@src/components/features/seo';
+import { Comments } from '@src/components/shared/Comments';
 import { Container } from '@src/components/shared/container';
 import { client, previewClient } from '@src/lib/client';
 import { revalidateDuration } from '@src/pages/utils/constants';
@@ -34,6 +35,9 @@ const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
           <ArticleTileGrid className="md:grid-cols-2" articles={relatedPosts} />
         </Container>
       )}
+      <Container className="max-w-4xl">
+        <Comments title={t('article.comments')} />
+      </Container>
     </>
   );
 };

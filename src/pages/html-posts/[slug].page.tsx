@@ -10,9 +10,10 @@ import remarkGfm from 'remark-gfm';
 
 import { getServerSideTranslations } from '../utils/get-serverside-translations';
 
+import { CtfEmbed } from '@src/components/features/contentful/CtfEmbed';
+import { Comments } from '@src/components/shared/Comments';
 import { Container } from '@src/components/shared/container';
 import { FormatDate } from '@src/components/shared/format-date';
-import { CtfEmbed } from '@src/components/features/contentful/CtfEmbed';
 import { client, previewClient } from '@src/lib/client';
 import { revalidateDuration } from '@src/pages/utils/constants';
 
@@ -91,6 +92,10 @@ const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
             </div>
           )}
         </div>
+      </Container>
+
+      <Container className="max-w-4xl">
+        <Comments title={t('article.comments')} />
       </Container>
 
       <Container className="my-12 max-w-4xl">
