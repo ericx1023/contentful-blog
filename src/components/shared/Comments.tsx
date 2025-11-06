@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
+import { useTheme } from '@src/hooks/useTheme';
 
 interface CommentsProps {
   title?: string;
@@ -10,6 +11,7 @@ export const Comments = ({ title, className = '' }: CommentsProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const { locale, asPath } = useRouter();
+  const { resolvedTheme } = useTheme();
 
   // Map Next.js locales to Isso supported languages
   const getIssoLanguage = (locale: string) => {
@@ -100,6 +102,9 @@ export const Comments = ({ title, className = '' }: CommentsProps) => {
       '#9abf88 #5698c4 #e279a3 #9163b6 #be5168 #f19670 #e4b14b #8fa97c #c8d2f5 #d5c7a5',
     );
     scriptElem.setAttribute('data-isso-vote', 'true');
+    scriptElem.setAttribute('data-isso-feed', 'false');
+    // Explicitly enable delete functionality
+    scriptElem.setAttribute('data-isso-reply-notifications-default-enabled', 'false');
 
     // Handle script load success
     scriptElem.onload = () => {
@@ -136,7 +141,9 @@ export const Comments = ({ title, className = '' }: CommentsProps) => {
 
   return (
     <div className={`mt-12 ${className}`}>
-      <h3 className="text-gray-900 mb-6 text-2xl font-bold">{title || '留言討論'}</h3>
+      <h3 className="mb-6 text-2xl font-bold text-blue-medium dark:text-accent-blue-dark">
+        {title || '留言討論'}
+      </h3>
       <div ref={ref} className="isso-comments" />
     </div>
   );

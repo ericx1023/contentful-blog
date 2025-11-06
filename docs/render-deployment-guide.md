@@ -76,6 +76,9 @@ require-email = false
 
 6. **Advanced settings:**
    - **Docker Command**: Leave empty (uses Dockerfile CMD)
+   - **Docker Context Directory**: `isso-server`
+   - **Dockerfile Path**: `isso-server/Dockerfile`
+   - **Health Check Path**: `/js/embed.min.js` ⚠️ **CRITICAL - Isso has no / endpoint**
    - **Auto-Deploy**: `Yes`
 
 7. **Click "Create Web Service"**
@@ -122,3 +125,45 @@ NEXT_PUBLIC_ISSO_URL=https://your-isso-url.onrender.com
 - **First request after sleep**: ~30 seconds cold start
 
 For a personal blog, this is usually sufficient!
+
+## Troubleshooting
+
+### Service not responding (curl timeout)
+
+**Symptom**: `curl https://isso-server.onrender.com/js/embed.min.js` hangs and times out.
+
+**Most likely cause**: Health check misconfiguration. Render requires services to respond to health checks, but Isso has no endpoint at `/` (the default).
+
+**Solution**:
+1. Go to Render Dashboard → Your Service → Settings
+2. Scroll to "Health Check Path"
+3. Change from `/` to `/js/embed.min.js`
+4. Click "Save Changes"
+5. Render will redeploy automatically
+
+**Alternative**: Use the `render.yaml` file in the repo root (already configured correctly).
+
+### CORS errors in browser console
+
+**Symptom**: Browser shows CORS errors like "Access-Control-Allow-Origin".
+
+**Solution**: Update `isso.conf` to include your domain:
+```ini
+[general]
+host = 
+    http://localhost:3000
+    https://www.psychevalley.org
+    https://yourdomain.vercel.app
+```
+
+Push the changes and Render will auto-deploy.
+
+### Check service health
+
+```bash
+# Should return 200 OK after health check is fixed
+curl -I https://isso-server.onrender.com/js/embed.min.js
+
+# Check if service is running
+curl https://isso-server.onrender.com/info
+```

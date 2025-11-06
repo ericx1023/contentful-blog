@@ -93,3 +93,171 @@
   }
 }
 
+/* Isso Comments - Dark Mode Support */
+@layer components {
+  /* Dark mode styles for Isso comments - matching article content colors */
+  .dark #isso-thread {
+    color: #FFFFFF;
+  }
+
+  .dark #isso-thread .isso-comment {
+    background-color: #1F1F1F;
+    border-color: #3F3F3F;
+  }
+
+  .dark #isso-thread .isso-comment-header {
+    color: #FFFFFF;
+  }
+
+  .dark #isso-thread .isso-comment-header a {
+    color: #64B5F6;
+  }
+
+  .dark #isso-thread .isso-comment-header a:hover {
+    color: #4DD0E1;
+  }
+
+  .dark #isso-thread .isso-comment > div.text-wrapper > .isso-comment-text {
+    color: #E0E0E0;
+  }
+
+  .dark #isso-thread .isso-comment > div.text-wrapper > .isso-comment-text p {
+    color: #E0E0E0;
+  }
+
+  .dark #isso-thread .isso-postbox {
+    background-color: #1F1F1F;
+    border-color: #3F3F3F;
+  }
+
+  .dark #isso-thread .isso-postbox > .form-wrapper {
+    background-color: #1F1F1F;
+  }
+
+  .dark #isso-thread .isso-postbox > .form-wrapper .textarea,
+  .dark #isso-thread .isso-postbox > .form-wrapper input[type="text"],
+  .dark #isso-thread .isso-postbox > .form-wrapper input[type="email"] {
+    background-color: #2D2D2D;
+    border-color: #555555;
+    color: #FFFFFF;
+  }
+
+  .dark #isso-thread .isso-postbox > .form-wrapper .textarea::placeholder,
+  .dark #isso-thread .isso-postbox > .form-wrapper input::placeholder {
+    color: #A0A0A0;
+  }
+
+  .dark #isso-thread .isso-postbox > .form-wrapper .textarea:focus,
+  .dark #isso-thread .isso-postbox > .form-wrapper input:focus {
+    border-color: #64B5F6;
+    background-color: #2D2D2D;
+  }
+
+  .dark #isso-thread .isso-postbox > .form-wrapper .submit,
+  .dark #isso-thread input[type="submit"] {
+    background-color: #64B5F6;
+    color: #0A0A0A;
+    font-weight: 600;
+  }
+
+  .dark #isso-thread .isso-postbox > .form-wrapper .submit:hover,
+  .dark #isso-thread input[type="submit"]:hover {
+    background-color: #4DD0E1;
+  }
+
+  /* Preview button styling */
+  .dark #isso-thread .isso-postbox > .form-wrapper > .preview,
+  .dark #isso-thread .isso-postbox .preview,
+  .dark #isso-thread button.preview,
+  .dark #isso-thread input[type="button"] {
+    background-color: #2D2D2D !important;
+    color: #FFFFFF !important;
+    border: 1px solid #555555 !important;
+    font-weight: 600;
+  }
+
+  .dark #isso-thread .isso-postbox > .form-wrapper > .preview:hover,
+  .dark #isso-thread .isso-postbox .preview:hover,
+  .dark #isso-thread button.preview:hover,
+  .dark #isso-thread input[type="button"]:hover {
+    background-color: #3F3F3F !important;
+    border-color: #64B5F6 !important;
+  }
+
+  .dark #isso-thread .isso-comment > div.text-wrapper > .isso-comment-footer a {
+    color: #A0A0A0;
+  }
+
+  .dark #isso-thread .isso-comment > div.text-wrapper > .isso-comment-footer a:hover {
+    color: #64B5F6;
+  }
+
+  .dark #isso-thread .isso-comment-footer a.reply,
+  .dark #isso-thread .isso-comment-footer a.edit,
+  .dark #isso-thread .isso-comment-footer a.delete {
+    color: #A0A0A0;
+  }
+
+  .dark #isso-thread .isso-comment-footer a.reply:hover,
+  .dark #isso-thread .isso-comment-footer a.edit:hover,
+  .dark #isso-thread .isso-comment-footer a.delete:hover {
+    color: #64B5F6;
+  }
+
+  .dark #isso-thread .isso-comment > .isso-follow-up {
+    border-left-color: #3F3F3F;
+  }
+
+  .dark #isso-thread .auth-section .input-wrapper input {
+    background-color: #2D2D2D;
+    border-color: #555555;
+    color: #FFFFFF;
+  }
+
+  .dark #isso-thread a.upvote svg,
+  .dark #isso-thread a.downvote svg {
+    fill: #A0A0A0;
+  }
+
+  .dark #isso-thread a.upvote:hover svg,
+  .dark #isso-thread a.downvote:hover svg {
+    fill: #64B5F6;
+  }
+
+  /* Additional specific selectors for better coverage */
+  .dark #isso-thread * {
+    border-color: inherit;
+  }
+
+  /* Force dark background on all input elements including textarea */
+  .dark #isso-thread .textarea,
+  .dark #isso-thread textarea,
+  .dark #isso-thread input[type="text"],
+  .dark #isso-thread input[type="email"] {
+    background-color: #2D2D2D !important;
+    color: #FFFFFF !important;
+    border-color: #555555 !important;
+  }
+
+  .dark #isso-thread .textarea::placeholder,
+  .dark #isso-thread textarea::placeholder,
+  .dark #isso-thread input::placeholder {
+    color: #A0A0A0 !important;
+  }
+
+  /* More specific textarea selectors */
+  .dark #isso-thread .isso-postbox textarea,
+  .dark #isso-thread .isso-postbox .textarea,
+  .dark #isso-thread div.textarea {
+    background-color: #2D2D2D !important;
+    color: #FFFFFF !important;
+    border-color: #555555 !important;
+  }
+
+  /* Target the contenteditable div that Isso might use */
+  .dark #isso-thread [contenteditable="true"] {
+    background-color: #2D2D2D !important;
+    color: #FFFFFF !important;
+  }
+}
+

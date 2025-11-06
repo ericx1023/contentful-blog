@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: isso-server
+    runtime: docker
+    region: oregon  # Change to ohio, singapore, or frankfurt if Oregon has issues
+    plan: free
+    dockerfilePath: ./isso-server/Dockerfile
+    dockerContext: ./isso-server
+    envVars:
+      - key: PORT
+        value: 10000
+    # Isso doesn't have a default health check endpoint at /
+    # Use /js/embed.min.js to verify the service is responding
+    healthCheckPath: /js/embed.min.js
+    autoDeploy: true
+
