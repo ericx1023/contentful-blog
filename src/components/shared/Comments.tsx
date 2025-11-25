@@ -1,39 +1,26 @@
 import { useRouter } from 'next/router';
-import { useEffect, useRef, useState } from 'react';
-import { useTheme } from '@src/hooks/useTheme';
+import { useEffect, useRef } from 'react';
 
 interface CommentsProps {
   title?: string;
   className?: string;
 }
 
+declare global {
+  interface Window {
+    Isso?: {
+      init: () => void;
+    };
+  }
+}
+
 export const Comments = ({ title, className = '' }: CommentsProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const { locale, asPath } = useRouter();
-  const { resolvedTheme } = useTheme();
-
-  // Map Next.js locales to Isso supported languages
-  const getIssoLanguage = (locale: string) => {
-    const languageMap: Record<string, string> = {
-      en: 'en',
-      'en-US': 'en',
-      'zh-Hant-TW': 'zh_TW',
-      'zh-Hans': 'zh_CN',
-      ja: 'ja',
-      ko: 'ko',
-      es: 'es',
-      fr: 'fr',
-      de: 'de',
-      pt: 'pt',
-      ru: 'ru',
-    };
-    return languageMap[locale] || 'en';
-  };
+  const { asPath } = useRouter();
+  const initAttempted = useRef(false);
 
   useEffect(() => {
-    console.log('Comments component useEffect triggered');
-    console.log('NEXT_PUBLIC_ISSO_URL:', process.env.NEXT_PUBLIC_ISSO_URL);
+    console.log('Comments component mounted for path:', asPath);
 
     // Don't load if no Isso URL is configured
     if (!process.env.NEXT_PUBLIC_ISSO_URL) {
@@ -41,29 +28,8 @@ export const Comments = ({ title, className = '' }: CommentsProps) => {
       return;
     }
 
-    console.log('ref.current:', ref.current);
-    console.log('scriptLoaded:', scriptLoaded);
-
-    if (!ref.current || scriptLoaded) {
-      console.log('Returning early - ref or scriptLoaded issue');
-      return;
-    }
-
-    // Check if script is already loaded globally
-    const existingScript = document.querySelector(
-      `script[src*="${process.env.NEXT_PUBLIC_ISSO_URL}"]`,
-    );
-    console.log('existingScript:', existingScript);
-
-    if (existingScript) {
-      console.log('Script already exists, creating thread only');
-      setScriptLoaded(true);
-      // Just create the thread section
-      const section = document.createElement('section');
-      section.id = 'isso-thread';
-      section.setAttribute('data-isso-id', asPath);
-      section.setAttribute('data-title', document.title);
-      ref.current.appendChild(section);
+    if (!ref.current) {
+      console.log('ref.current not available yet');
       return;
     }
 
@@ -77,62 +43,57 @@ export const Comments = ({ title, className = '' }: CommentsProps) => {
     section.setAttribute('data-title', document.title);
 
     ref.current.appendChild(section);
+    console.log('Created #isso-thread element for path:', asPath);
 
-    console.log('Creating new Isso script...');
-
-    // Load Isso script only once
-    const scriptElem = document.createElement('script');
-    scriptElem.src = `${process.env.NEXT_PUBLIC_ISSO_URL}/js/embed.min.js`;
-    scriptElem.async = true;
-
-    console.log('Script src:', scriptElem.src);
-    scriptElem.setAttribute('data-isso', process.env.NEXT_PUBLIC_ISSO_URL);
-    scriptElem.setAttribute('data-isso-css', 'true');
-    scriptElem.setAttribute('data-isso-lang', getIssoLanguage(locale || 'en'));
-    scriptElem.setAttribute('data-isso-reply-to-self', 'false');
-    scriptElem.setAttribute('data-isso-require-author', 'false');
-    scriptElem.setAttribute('data-isso-require-email', 'false');
-    scriptElem.setAttribute('data-isso-max-comments-top', '10');
-    scriptElem.setAttribute('data-isso-max-comments-nested', '5');
-    scriptElem.setAttribute('data-isso-reveal-on-click', '5');
-    scriptElem.setAttribute('data-isso-avatar', 'true');
-    scriptElem.setAttribute('data-isso-avatar-bg', '#f0f0f0');
-    scriptElem.setAttribute(
-      'data-isso-avatar-fg',
-      '#9abf88 #5698c4 #e279a3 #9163b6 #be5168 #f19670 #e4b14b #8fa97c #c8d2f5 #d5c7a5',
-    );
-    scriptElem.setAttribute('data-isso-vote', 'true');
-    scriptElem.setAttribute('data-isso-feed', 'false');
-    // Explicitly enable delete functionality
-    scriptElem.setAttribute('data-isso-reply-notifications-default-enabled', 'false');
-
-    // Handle script load success
-    scriptElem.onload = () => {
-      console.log('Isso script loaded successfully!');
-      setScriptLoaded(true);
-    };
-
-    // Handle script load errors
-    scriptElem.onerror = () => {
-      console.error('Failed to load Isso comments from:', process.env.NEXT_PUBLIC_ISSO_URL);
-      if (ref.current) {
-        ref.current.innerHTML = `
-          <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p class="text-yellow-800 text-sm">
-              Comments are temporarily unavailable. Server: ${process.env.NEXT_PUBLIC_ISSO_URL}
-            </p>
-            <p class="text-yellow-700 text-xs mt-2">
-              Check browser console for details.
-            </p>
-          </div>
-        `;
+    // Wait for Isso script to be available and initialize
+    const initializeIsso = () => {
+      if (window.Isso && typeof window.Isso.init === 'function') {
+        console.log('Initializing Isso for new thread');
+        try {
+          window.Isso.init();
+          initAttempted.current = true;
+        } catch (error) {
+          console.error('Error initializing Isso:', error);
+        }
+      } else {
+        console.log('Isso not ready yet, waiting...');
+        // Retry after a short delay
+        if (!initAttempted.current) {
+          setTimeout(initializeIsso, 100);
+        }
       }
     };
 
-    console.log('Adding script to document head...');
-    document.head.appendChild(scriptElem);
-    console.log('Script added to head');
-  }, [locale, asPath, scriptLoaded]);
+    // Check if script is already loaded
+    const existingScript = document.querySelector(
+      `script[src*="${process.env.NEXT_PUBLIC_ISSO_URL}"]`,
+    );
+
+    if (existingScript) {
+      console.log('Isso script already loaded, initializing thread');
+      // Script is loaded, initialize immediately or wait a bit
+      setTimeout(initializeIsso, 50);
+    } else {
+      console.log('Waiting for Isso script to load from _app.tsx');
+      // Listen for script load
+      const checkInterval = setInterval(() => {
+        if (window.Isso) {
+          clearInterval(checkInterval);
+          initializeIsso();
+        }
+      }, 100);
+
+      // Cleanup interval after 10 seconds
+      setTimeout(() => clearInterval(checkInterval), 10000);
+
+      return () => clearInterval(checkInterval);
+    }
+
+    // Reset init flag when unmounting
+    return () => {
+      initAttempted.current = false;
+    };
+  }, [asPath]); // Re-run when path changes
 
   // Don't render anything if Isso URL is not configured
   if (!process.env.NEXT_PUBLIC_ISSO_URL) {
