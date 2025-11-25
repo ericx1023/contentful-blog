@@ -25,17 +25,41 @@ const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
   const standardPosts = useContentfulLiveUpdates(props.standardPosts);
   const htmlPosts = useContentfulLiveUpdates(props.htmlPosts);
 
-  if (!page?.featuredBlogPost || !standardPosts) return;
+  if (!standardPosts && !htmlPosts) return;
 
-  // 合併並排序文章
+  // 合併並排序文章，獲取所有文章
   const allPosts = mergeAndSortArticles(standardPosts, htmlPosts);
+
+  // 使用最新的文章作為精選文章
+  const featuredArticle = allPosts[0];
+  // 剩餘的文章顯示在網格中
+  const remainingPosts = allPosts.slice(1);
+
+  if (!featuredArticle) return;
+
+  // 為 ArticleHero 創建兼容的文章對象
+  const featuredArticleForHero = {
+    __typename: 'PageBlogPost' as const,
+    sys: featuredArticle.sys,
+    slug: featuredArticle.slug,
+    title: featuredArticle.title,
+    internalName: featuredArticle.internalName,
+    publishedDate: featuredArticle.publishedDate,
+    shortDescription: featuredArticle.shortDescription || null,
+    author: featuredArticle.author,
+    featuredImage: featuredArticle.featuredImage,
+  };
 
   return (
     <>
-      {page.seoFields && <SeoFields {...page.seoFields} />}
+      {page?.seoFields && <SeoFields {...page.seoFields} />}
       <Container>
-        <Link href={`/${page.featuredBlogPost.slug}`}>
-          <ArticleHero article={page.featuredBlogPost} />
+        <Link
+          href={`/${featuredArticle.articleType === ArticleType.MARKDOWN ? 'html-posts/' : ''}${
+            featuredArticle.slug
+          }`}
+        >
+          <ArticleHero article={featuredArticleForHero} />
         </Link>
       </Container>
 
@@ -47,7 +71,10 @@ const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
 
       <Container className="my-8 md:mb-10 lg:mb-16">
         <h2 className="mb-4 md:mb-6">{t('landingPage.latestArticles')}</h2>
-        <UnifiedArticleTileGrid className="md:grid-cols-2 lg:grid-cols-3" articles={allPosts} />
+        <UnifiedArticleTileGrid
+          className="md:grid-cols-2 lg:grid-cols-3"
+          articles={remainingPosts}
+        />
       </Container>
     </>
   );
@@ -60,14 +87,11 @@ export const getStaticProps: GetStaticProps = async ({ locale, draftMode: previe
     const landingPageData = await gqlClient.pageLanding({ locale, preview });
     const page = landingPageData.pageLandingCollection?.items[0];
 
-    // 獲取標準部落格文章
+    // 獲取標準部落格文章 - 獲取所有文章，不再排除任何文章
     const standardBlogPostsData = await gqlClient.pageBlogPostCollection({
       limit: 10,
       locale,
       order: PageBlogPostOrder.PublishedDateDesc,
-      where: {
-        slug_not: (page?.featuredBlogPost as PageBlogPost)?.slug,
-      },
       preview,
     });
     const standardPosts = standardBlogPostsData.pageBlogPostCollection?.items;
@@ -81,7 +105,8 @@ export const getStaticProps: GetStaticProps = async ({ locale, draftMode: previe
     });
     const htmlPosts = htmlBlogPostsData.pageBlogPostWithHtmlCollection?.items;
 
-    if (!page) {
+    // 檢查是否至少有一篇文章
+    if ((!standardPosts || standardPosts.length === 0) && (!htmlPosts || htmlPosts.length === 0)) {
       return {
         revalidate: revalidateDuration,
         notFound: true,
@@ -93,9 +118,9 @@ export const getStaticProps: GetStaticProps = async ({ locale, draftMode: previe
       props: {
         previewActive: !!preview,
         ...(await getServerSideTranslations(locale)),
-        page,
-        standardPosts,
-        htmlPosts,
+        page: page || null,
+        standardPosts: standardPosts || [],
+        htmlPosts: htmlPosts || [],
       },
     };
   } catch {
