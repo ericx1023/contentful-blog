@@ -24,7 +24,7 @@ const professionalColors = {
   'gray-dark': '#2D2D2D',
   'gray-medium': '#555555',
   'gray-light': '#8C8C8C',
-  'gray-lightest': '#E0E0E0',
+  'gray-lightest': '#FFFDF9',
 
   // 輔助色系
   'accent-teal': '#2D7D8A',
@@ -36,6 +36,11 @@ const professionalColors = {
   'warning': '#EF6C00',
   'error': '#C62828',
   'info': '#1565C0',
+
+  // purple color palette
+  'purple-dark': '#3C325C',
+  'purple-medium': '#625B7B',
+  'purple-light': '#86848D',
 };
 
 // 深色模式色系
@@ -45,16 +50,16 @@ const darkModeColors = {
   'bg-secondary-dark': '#1A1A1A',
   'bg-tertiary-dark': '#2D2D2D',
   'bg-card-dark': '#1F1F1F',
-  
+
   // 深色文字
   'text-primary-dark': '#FFFFFF',
   'text-secondary-dark': '#E0E0E0',
   'text-muted-dark': '#A0A0A0',
-  
+
   // 深色邊框
   'border-dark': '#3F3F3F',
   'border-light-dark': '#555555',
-  
+
   // 深色強調色
   'accent-blue-dark': '#64B5F6',
   'accent-teal-dark': '#4DD0E1',

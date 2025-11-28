@@ -26,11 +26,12 @@ const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
       <Container>
         <ArticleHero article={blogPost} isFeatured={props.isFeatured} isReversedLayout={true} />
       </Container>
-      <Container className="mt-8 max-w-4xl">
+      <Container className="mt-8 max-w-3xl">
         <ArticleContent article={blogPost} />
       </Container>
+      <hr className="my-16 border-gray400 h-px w-full max-w-4xl mx-auto" />
       {relatedPosts && (
-        <Container className="mt-8 max-w-5xl">
+        <Container className=" w-full flex-col max-w-4xl">
           <h2 className="mb-4 md:mb-6">{t('article.relatedArticles')}</h2>
           <ArticleTileGrid className="md:grid-cols-2" articles={relatedPosts} />
         </Container>

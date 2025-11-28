@@ -33,6 +33,7 @@
     "@contentful/rich-text-react-renderer": "^15.16.2",
     "@next/bundle-analyzer": "^13.0.4",
     "@vercel/analytics": "^1.1.1",
+    "dayjs": "^1.11.19",
     "dotenv": "^16.0.3",
     "graphql": "^16.6.0",
     "graphql-request": "4",

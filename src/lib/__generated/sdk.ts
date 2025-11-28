@@ -356,6 +356,8 @@ export enum ComponentAuthorLinkingCollectionsPageBlogPostCollectionOrder {
   PublishedDateDesc = 'publishedDate_DESC',
   SlugAsc = 'slug_ASC',
   SlugDesc = 'slug_DESC',
+  SourceUrlAsc = 'sourceUrl_ASC',
+  SourceUrlDesc = 'sourceUrl_DESC',
   SysFirstPublishedAtAsc = 'sys_firstPublishedAt_ASC',
   SysFirstPublishedAtDesc = 'sys_firstPublishedAt_DESC',
   SysIdAsc = 'sys_id_ASC',
@@ -668,6 +670,8 @@ export enum ComponentSeoLinkingCollectionsPageBlogPostCollectionOrder {
   PublishedDateDesc = 'publishedDate_DESC',
   SlugAsc = 'slug_ASC',
   SlugDesc = 'slug_DESC',
+  SourceUrlAsc = 'sourceUrl_ASC',
+  SourceUrlDesc = 'sourceUrl_DESC',
   SysFirstPublishedAtAsc = 'sys_firstPublishedAt_ASC',
   SysFirstPublishedAtDesc = 'sys_firstPublishedAt_DESC',
   SysIdAsc = 'sys_id_ASC',
@@ -898,6 +902,7 @@ export type PageBlogPost = Entry & _Node & {
   seoFields?: Maybe<ComponentSeo>;
   shortDescription?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
+  sourceUrl?: Maybe<Scalars['String']>;
   sys: Sys;
   title?: Maybe<Scalars['String']>;
 };
@@ -969,6 +974,12 @@ export type PageBlogPostShortDescriptionArgs = {
 
 /** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
 export type PageBlogPostSlugArgs = {
+  locale?: InputMaybe<Scalars['String']>;
+};
+
+
+/** [See type definition](https://app.contentful.com/spaces/ljhf0uo4wt6j/content_types/pageBlogPost) */
+export type PageBlogPostSourceUrlArgs = {
   locale?: InputMaybe<Scalars['String']>;
 };
 
@@ -1078,6 +1089,13 @@ export type PageBlogPostFilter = {
   slug_not?: InputMaybe<Scalars['String']>;
   slug_not_contains?: InputMaybe<Scalars['String']>;
   slug_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  sourceUrl?: InputMaybe<Scalars['String']>;
+  sourceUrl_contains?: InputMaybe<Scalars['String']>;
+  sourceUrl_exists?: InputMaybe<Scalars['Boolean']>;
+  sourceUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  sourceUrl_not?: InputMaybe<Scalars['String']>;
+  sourceUrl_not_contains?: InputMaybe<Scalars['String']>;
+  sourceUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   sys?: InputMaybe<SysFilter>;
   title?: InputMaybe<Scalars['String']>;
   title_contains?: InputMaybe<Scalars['String']>;
@@ -1128,6 +1146,8 @@ export enum PageBlogPostLinkingCollectionsPageBlogPostCollectionOrder {
   PublishedDateDesc = 'publishedDate_DESC',
   SlugAsc = 'slug_ASC',
   SlugDesc = 'slug_DESC',
+  SourceUrlAsc = 'sourceUrl_ASC',
+  SourceUrlDesc = 'sourceUrl_DESC',
   SysFirstPublishedAtAsc = 'sys_firstPublishedAt_ASC',
   SysFirstPublishedAtDesc = 'sys_firstPublishedAt_DESC',
   SysIdAsc = 'sys_id_ASC',
@@ -1160,6 +1180,8 @@ export enum PageBlogPostOrder {
   PublishedDateDesc = 'publishedDate_DESC',
   SlugAsc = 'slug_ASC',
   SlugDesc = 'slug_DESC',
+  SourceUrlAsc = 'sourceUrl_ASC',
+  SourceUrlDesc = 'sourceUrl_DESC',
   SysFirstPublishedAtAsc = 'sys_firstPublishedAt_ASC',
   SysFirstPublishedAtDesc = 'sys_firstPublishedAt_DESC',
   SysIdAsc = 'sys_id_ASC',
@@ -1187,6 +1209,8 @@ export enum PageBlogPostRelatedBlogPostsCollectionOrder {
   PublishedDateDesc = 'publishedDate_DESC',
   SlugAsc = 'slug_ASC',
   SlugDesc = 'slug_DESC',
+  SourceUrlAsc = 'sourceUrl_ASC',
+  SourceUrlDesc = 'sourceUrl_DESC',
   SysFirstPublishedAtAsc = 'sys_firstPublishedAt_ASC',
   SysFirstPublishedAtDesc = 'sys_firstPublishedAt_DESC',
   SysIdAsc = 'sys_id_ASC',
@@ -1693,6 +1717,13 @@ export type TaxonomyConcept = {
   id?: Maybe<Scalars['String']>;
 };
 
+export type TimelineFilterInput = {
+  /** Preview content starting from a given release date */
+  release_lte?: InputMaybe<Scalars['String']>;
+  /** Preview content starting from a given timestamp */
+  timestamp_lte?: InputMaybe<Scalars['DateTime']>;
+};
+
 export type _Node = {
   _id: Scalars['ID'];
 };
@@ -1802,6 +1833,13 @@ export type CfPageBlogPostNestedFilter = {
   slug_not?: InputMaybe<Scalars['String']>;
   slug_not_contains?: InputMaybe<Scalars['String']>;
   slug_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  sourceUrl?: InputMaybe<Scalars['String']>;
+  sourceUrl_contains?: InputMaybe<Scalars['String']>;
+  sourceUrl_exists?: InputMaybe<Scalars['Boolean']>;
+  sourceUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  sourceUrl_not?: InputMaybe<Scalars['String']>;
+  sourceUrl_not_contains?: InputMaybe<Scalars['String']>;
+  sourceUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   sys?: InputMaybe<SysFilter>;
   title?: InputMaybe<Scalars['String']>;
   title_contains?: InputMaybe<Scalars['String']>;

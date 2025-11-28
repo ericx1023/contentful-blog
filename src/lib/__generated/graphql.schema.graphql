@@ -8,10 +8,7 @@ directive @featureFlag(featureName: String) on FIELD
 
 directive @fieldResolver(data: JSON, kind: String) on FIELD_DEFINITION
 
-"""
-Indicates exactly one field must be supplied and this field must not be `null`.
-"""
-directive @oneOf on INPUT_OBJECT
+directive @timeline(where: TimelineFilterInput!) on QUERY
 
 directive @typeIdentifier(contentTypeId: String) on OBJECT
 
@@ -193,6 +190,8 @@ enum ComponentAuthorLinkingCollectionsPageBlogPostCollectionOrder {
   publishedDate_DESC
   slug_ASC
   slug_DESC
+  sourceUrl_ASC
+  sourceUrl_DESC
   sys_firstPublishedAt_ASC
   sys_firstPublishedAt_DESC
   sys_id_ASC
@@ -387,6 +386,8 @@ enum ComponentSeoLinkingCollectionsPageBlogPostCollectionOrder {
   publishedDate_DESC
   slug_ASC
   slug_DESC
+  sourceUrl_ASC
+  sourceUrl_DESC
   sys_firstPublishedAt_ASC
   sys_firstPublishedAt_DESC
   sys_id_ASC
@@ -669,6 +670,7 @@ type PageBlogPost implements Entry & _Node {
   seoFields(locale: String, preview: Boolean, where: ComponentSeoFilter): ComponentSeo
   shortDescription(locale: String): String
   slug(locale: String): String
+  sourceUrl(locale: String): String
   sys: Sys!
   title(locale: String): String
 }
@@ -764,6 +766,13 @@ input PageBlogPostFilter {
   slug_not: String
   slug_not_contains: String
   slug_not_in: [String]
+  sourceUrl: String
+  sourceUrl_contains: String
+  sourceUrl_exists: Boolean
+  sourceUrl_in: [String]
+  sourceUrl_not: String
+  sourceUrl_not_contains: String
+  sourceUrl_not_in: [String]
   sys: SysFilter
   title: String
   title_contains: String
@@ -787,6 +796,8 @@ enum PageBlogPostLinkingCollectionsPageBlogPostCollectionOrder {
   publishedDate_DESC
   slug_ASC
   slug_DESC
+  sourceUrl_ASC
+  sourceUrl_DESC
   sys_firstPublishedAt_ASC
   sys_firstPublishedAt_DESC
   sys_id_ASC
@@ -819,6 +830,8 @@ enum PageBlogPostOrder {
   publishedDate_DESC
   slug_ASC
   slug_DESC
+  sourceUrl_ASC
+  sourceUrl_DESC
   sys_firstPublishedAt_ASC
   sys_firstPublishedAt_DESC
   sys_id_ASC
@@ -845,6 +858,8 @@ enum PageBlogPostRelatedBlogPostsCollectionOrder {
   publishedDate_DESC
   slug_ASC
   slug_DESC
+  sourceUrl_ASC
+  sourceUrl_DESC
   sys_firstPublishedAt_ASC
   sys_firstPublishedAt_DESC
   sys_id_ASC
@@ -1108,6 +1123,14 @@ type TaxonomyConcept {
   id: String
 }
 
+input TimelineFilterInput {
+  """Preview content starting from a given release date"""
+  release_lte: String
+
+  """Preview content starting from a given timestamp"""
+  timestamp_lte: DateTime
+}
+
 interface _Node {
   _id: ID!
 }
@@ -1217,6 +1240,13 @@ input cfPageBlogPostNestedFilter {
   slug_not: String
   slug_not_contains: String
   slug_not_in: [String]
+  sourceUrl: String
+  sourceUrl_contains: String
+  sourceUrl_exists: Boolean
+  sourceUrl_in: [String]
+  sourceUrl_not: String
+  sourceUrl_not_contains: String
+  sourceUrl_not_in: [String]
   sys: SysFilter
   title: String
   title_contains: String

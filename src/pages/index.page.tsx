@@ -17,6 +17,7 @@ import {
 import { client, previewClient } from '@src/lib/client';
 import { revalidateDuration } from '@src/pages/utils/constants';
 import { ArticleType, mergeAndSortArticles } from '@src/types/article';
+import { HeroSection } from '@src/components/features/article';
 
 const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
   const { t } = useTranslation();
@@ -35,7 +36,7 @@ const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
       {page.seoFields && <SeoFields {...page.seoFields} />}
       <Container>
         <Link href={`/${page.featuredBlogPost.slug}`}>
-          <ArticleHero article={page.featuredBlogPost} />
+          <HeroSection article={page.featuredBlogPost} />
         </Link>
       </Container>
 

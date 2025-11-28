@@ -1,16 +1,15 @@
 import { useRouter } from 'next/router';
+import dayjs from 'dayjs';
 
 interface FormatDateProps {
   date: number | Date | undefined;
   locale?: string;
 }
 
-export const formatDateFunc = ({ date, locale }: FormatDateProps) => {
+export const formatDateFunc = ({ date, locale = 'en' }: FormatDateProps) => {
   if (!locale || !date) return null;
 
-  return new Intl.DateTimeFormat(locale, {
-    dateStyle: 'long',
-  }).format(new Date(date));
+  return dayjs(date).format('MMM DD, YYYY');
 };
 
 export const FormatDate = (props: FormatDateProps) => {
