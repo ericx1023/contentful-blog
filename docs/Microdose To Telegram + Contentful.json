@@ -1,0 +1,286 @@
+{
+  "name": "Microdose To Telegram + Contentful",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dd3d0d00-954d-43cf-92cf-325d403a8988",
+              "name": "text",
+              "value": "={{ $json.text.replace(/```json|```/g, '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -256,
+        -272
+      ],
+      "id": "8bc864ab-906c-4068-b7dc-ab84e51107c9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "hour": 1
+            }
+          ]
+        },
+        "feedUrl": "https://themicrodose.substack.com/feed"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        -272
+      ],
+      "id": "9a1dec9c-4cfb-467b-b280-a023ddb4775f",
+      "name": "RSS"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一位專業的繁體中文翻譯官。請將以下提供的資料翻譯成「繁體中文」，並嚴格遵守以下輸出規範：\n\n1. 輸出格式必須是標準的 JSON。\n2. 只要輸出 JSON 本身，禁止包含任何說明文字、Markdown 程式碼區塊標籤（如 ```json）、或任何額外評論。\n3. 確保 JSON 內的特殊字元（如雙引號、換行符）已正確轉義，避免格式錯誤。\n4. 如果翻譯內容太長，請自動為我摘要，確保總長度不超過 4000 個字。\n待翻譯資料：\n- 標題：{{ $json.title }}\n- 內容：{{ $json[\"content:encodedSnippet\"] }}\n\n輸出格式範例：\n{\n  \"title\": \"翻譯後的標題內容\",\n  \"content\": \"翻譯後的內容全文\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        -656,
+        -272
+      ],
+      "id": "dd32f61f-6405-43c7-a913-aad53c24aae3",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -48
+      ],
+      "id": "99574b46-c9e9-405a-8d90-c93207173103",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2jK2r86AOltpqnlq",
+          "name": "psychevalley"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.contentful.com/spaces/ljhf0uo4wt6j/environments/master/entries",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/vnd.contentful.management.v1+json"
+            },
+            {
+              "name": "X-Contentful-Content-Type",
+              "value": "pageBlogPostWithHtml"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fields\": {\n      \"internalName\": {\n        \"en-US\": \"{{$('Merge').item.json.title }}\" \n      },\n      \"slug\": {\n        \"en-US\": \"{{$('RSS').item.json.title.toLowerCase().replace(/ /g, '-') }}\"\n      },\n      \"title\": {\n        \"en-US\": \"{{$('Merge').item.json.title }}\"\n      },\n     \"html\": {\n          \"en-US\": \"{{$('Merge').item.json.text.replace(/\\n/g, ' ').replace(/\\r/g, '')}}\"\n      },\n      \"sourceUrl\": \n        {\"en-US\":\"{{$('RSS').item.json.link}}\"}\n    }\n  }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -880,
+        64
+      ],
+      "id": "051f695a-6ef8-4641-ba1d-79a46ff7ec01",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Pzv6hjyrrwGmj58A",
+          "name": "Header Auth account 2"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "-1001904886242",
+        "text": "={{ $json.formattedMessage }}\n{{ $('RSS').item.json.link }}",
+        "additionalFields": {
+          "disable_web_page_preview": false,
+          "parse_mode": "HTML",
+          "message_thread_id": 4927
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        -272
+      ],
+      "id": "8997e70b-67f2-4d12-8336-074b1509d148",
+      "name": "Send a text message",
+      "webhookId": "0d826806-14f5-40af-9adf-c7e043b3d722",
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "gRI6SaSkiZQBUhXK",
+          "name": "Blog Agent"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 假設 Gemini 輸出的原始文字在 $json.text\nlet rawData = $json.text;\n\n// 清理可能存在的 Markdown 標籤與轉義符\nlet cleanText = rawData.replace(/```json|```/g, '').trim();\n\ntry {\n  const data = JSON.parse(cleanText);\n  const title = data.title;\n  let content = data.content;\n\n  // Telegram 總字數限制為 4096 個字元\n  // 為了保險，我們在這裡進行截斷處理，避免下一個節點報錯\n  const limit = 3800; \n  if (content.length > limit) {\n    content = content.substring(0, limit) + \"\\n\\n...(內容過長已截斷)\";\n  }\n\n  // 封裝成 Telegram 的 HTML 格式\n  // <b> 是粗體，<blockquote expandable> 是可展開區塊\n  const formattedMessage = `<b>📰 <a href=\"{{ $('RSS').item.json.link }}\">${title}</a></b>\\n\\n<blockquote expandable>${content}</blockquote>`;\n\n  return {\n    formattedMessage,\n    originalTitle: title\n  };\n} catch (e) {\n  return { error: \"JSON 解析失敗\", rawData };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        -272
+      ],
+      "id": "9d037e10-6c39-48ed-a46d-69d2397b2609",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "chatId": "-1003394981103",
+        "text": "={{ $json.formattedMessage }}\n{{ $('RSS').item.json.link }}",
+        "additionalFields": {
+          "disable_web_page_preview": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        -96
+      ],
+      "id": "21ba8d0b-7da9-43fd-b93f-12ca51e0d978",
+      "name": "Send a text message1",
+      "webhookId": "0d826806-14f5-40af-9adf-c7e043b3d722",
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "gRI6SaSkiZQBUhXK",
+          "name": "Blog Agent"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e000a0d4-09d2-4fc8-aa11-7276002bf73f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ca15c5b3a7be2c7ba7d8f564be969c0764c9658653f40fba973ed65a889f6cd2"
+  },
+  "id": "zx3n7iCvW3BCihfE",
+  "tags": [
+    {
+      "createdAt": "2025-04-10T21:33:26.045Z",
+      "updatedAt": "2025-04-10T21:33:26.045Z",
+      "id": "OHmzC0AVMpzhuXUl",
+      "name": "TelegramBot"
+    },
+    {
+      "createdAt": "2025-04-10T21:33:13.286Z",
+      "updatedAt": "2025-04-10T21:33:13.286Z",
+      "id": "bFqTDD3w1InBZX37",
+      "name": "RSS"
+    }
+  ]
+}

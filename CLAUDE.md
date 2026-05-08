@@ -30,6 +30,7 @@ Required environment variables (see `.env.example`):
 - `CONTENTFUL_ACCESS_TOKEN` - Contentful Delivery API token
 - `CONTENTFUL_PREVIEW_ACCESS_TOKEN` - Contentful Preview API token
 - `CONTENTFUL_PREVIEW_SECRET` - Secret for preview mode (optional)
+- `NEXT_PUBLIC_ISSO_URL` - URL of the Isso comment server (optional; comments are skipped if unset)
 
 ## Architecture
 
@@ -59,6 +60,9 @@ Both are unified through:
 - `src/pages/` - Next.js pages with different routing patterns:
   - `[slug].page.tsx` - Standard article pages
   - `html-posts/[slug].page.tsx` - Markdown article pages
+  - Note: `next.config.js` sets `pageExtensions: ['page.tsx', ...]`, so only files ending in `.page.tsx`/`.page.ts` are treated as routable pages. Co-located helpers (e.g. `utils/`, `*.test.tsx`) are ignored by the router.
+- `src/contexts/ThemeContext.tsx` - Light/dark mode provider, wired in `_app.page.tsx`. Components opt into dark variants via Tailwind `dark:` classes.
+- `isso-server/` - Self-hosted [Isso](https://posativ.org/isso/) comment server (Dockerfile + `isso.conf`) deployed to Render via `render.yaml`. The Next.js client loads `embed.min.js` from `NEXT_PUBLIC_ISSO_URL`.
 
 ### Custom Styling
 - Uses Tailwind CSS with custom design tokens from `@contentful/f36-tokens`
@@ -90,6 +94,13 @@ When modifying GraphQL queries:
 - Draft content accessible via `/api/draft?secret=<token>&slug=<slug>`
 - Disable with `/api/disable-draft`
 - Live updates enabled in development and preview modes
+
+### Comments (Isso)
+- The Isso embed script is loaded once globally in `src/pages/_app.page.tsx`, not per-page. `_app` first pings `${NEXT_PUBLIC_ISSO_URL}/js/embed.min.js` to wake the Render free-tier instance (cold starts can take 30–60s) and only injects the `<Script>` tag once the server responds.
+- Per-page rendering lives in `src/components/shared/Comments.tsx`, which creates an `#isso-thread` element keyed on the route and calls `window.Isso.init()`. It coordinates with `_app` via the `window.issoScriptLoaded` / `window.issoLoadFailed` flags — preserve that contract when changing either file.
+- CSP in `config/headers.js` must allow the Isso origin (script-src, connect-src, frame-src). Update it whenever `NEXT_PUBLIC_ISSO_URL` changes.
+- `node scripts/test-isso-server.js` probes the server's embed and main endpoints; useful when debugging cold-start or CORS issues.
+- Background and rationale: `docs/isso-cold-start-solution.md` (in 繁體中文).
 
 ## Testing and Quality
 

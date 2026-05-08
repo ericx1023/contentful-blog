@@ -3,9 +3,27 @@ import { Html, Head, Main, NextScript } from 'next/document';
 import Script from 'next/script';
 
 export default function Document() {
+  // Build CSP for meta tag (development-friendly)
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const cspContent = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.youtube.com https://www.google.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://isso-server.onrender.com",
+    "style-src 'self' 'unsafe-inline' https://isso-server.onrender.com",
+    "img-src 'self' data: https: blob:",
+    "font-src 'self' data:",
+    isDevelopment
+      ? "connect-src 'self' https://cdn.contentful.com https://preview.contentful.com https://graphql.contentful.com https://images.ctfassets.net https://images.eu.ctfassets.net https://www.google-analytics.com https://www.googletagmanager.com https://isso-server.onrender.com ws: wss: http://localhost:* http://127.0.0.1:*"
+      : "connect-src 'self' https://cdn.contentful.com https://preview.contentful.com https://graphql.contentful.com https://images.ctfassets.net https://images.eu.ctfassets.net https://www.google-analytics.com https://www.googletagmanager.com https://isso-server.onrender.com",
+    "media-src 'self' https:",
+    "frame-src 'self' https://www.youtube.com",
+    "frame-ancestors 'self' https://app.contentful.com https://app.eu.contentful.com",
+  ].join('; ');
+
   return (
     <Html lang="en" className="dark">
       <Head>
+        {/* CSP Meta Tag for Development */}
+        {isDevelopment && <meta httpEquiv="Content-Security-Policy" content={cspContent} />}
         <script
           dangerouslySetInnerHTML={{
             __html: `

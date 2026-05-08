@@ -10,7 +10,6 @@ import remarkGfm from 'remark-gfm';
 
 import { getServerSideTranslations } from '../utils/get-serverside-translations';
 
-import { CtfEmbed } from '@src/components/features/contentful/CtfEmbed';
 import { Comments } from '@src/components/shared/Comments';
 import { Container } from '@src/components/shared/container';
 import { FormatDate } from '@src/components/shared/format-date';
@@ -85,11 +84,18 @@ const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
             {post.html || ''}
           </ReactMarkdown>
 
-          {/* Rich Embed - Check if sourceUrl exists in post data */}
           {post.sourceUrl && (
-            <div className="border-gray-200 mt-8 border-t pt-6">
-              <CtfEmbed embed={post} />
-            </div>
+            <p className="border-gray-200 text-gray-600 mt-8 border-t pt-6 text-sm">
+              原文：
+              <a
+                href={post.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline-offset-2 hover:underline"
+              >
+                {post.sourceUrl}
+              </a>
+            </p>
           )}
         </div>
       </Container>

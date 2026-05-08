@@ -1,0 +1,15 @@
+{
+  "name": "post-microdose",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node post-microdose.js"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.5.0",
+    "dotenv": "^16.4.5",
+    "jsdom": "^24.1.1",
+    "rss-parser": "^3.13.0"
+  }
+}
