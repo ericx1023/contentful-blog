@@ -356,6 +356,23 @@ async function deleteEntryBySlug(slug) {
   return deletedCount;
 }
 
+async function rollbackAsset(assetId, base, auth) {
+  try {
+    const r = await fetch(`${base}/assets/${assetId}`, {
+      headers: { Authorization: auth.Authorization },
+    });
+    if (!r.ok) return;
+    const a = await r.json();
+    if (a.sys.publishedVersion) {
+      await fetch(`${base}/assets/${assetId}/published`, { method: 'DELETE', headers: auth });
+    }
+    await fetch(`${base}/assets/${assetId}`, { method: 'DELETE', headers: auth });
+    log(`  ↳ rolled back orphan asset ${assetId}`);
+  } catch {
+    /* best-effort cleanup */
+  }
+}
+
 async function publishToContentful({ title, content, sourceUrl, slug, featuredImageUrl }) {
   const base = `https://api.contentful.com/spaces/${CONTENTFUL_SPACE_ID}/environments/${CONTENTFUL_ENV}`;
   const auth = {
@@ -393,6 +410,7 @@ async function publishToContentful({ title, content, sourceUrl, slug, featuredIm
     body: JSON.stringify({ fields }),
   });
   if (!createRes.ok) {
+    if (assetId) await rollbackAsset(assetId, base, auth);
     throw new Error(`Contentful create ${createRes.status}: ${await createRes.text()}`);
   }
   const entry = await createRes.json();
@@ -402,11 +420,12 @@ async function publishToContentful({ title, content, sourceUrl, slug, featuredIm
     headers: { ...auth, 'X-Contentful-Version': String(entry.sys.version) },
   });
   if (!pubRes.ok) {
-    // Roll back the orphan draft so it doesn't accumulate on retries.
+    // Roll back orphan draft + uploaded asset so retries don't accumulate junk.
     await fetch(`${base}/entries/${entry.sys.id}`, {
       method: 'DELETE',
       headers: { ...auth, 'X-Contentful-Version': String(entry.sys.version) },
     }).catch(() => {});
+    if (assetId) await rollbackAsset(assetId, base, auth);
     throw new Error(`Contentful publish ${pubRes.status}: ${await pubRes.text()}`);
   }
   return entry.sys.id;
