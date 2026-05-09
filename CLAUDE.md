@@ -63,6 +63,7 @@ Both are unified through:
   - Note: `next.config.js` sets `pageExtensions: ['page.tsx', ...]`, so only files ending in `.page.tsx`/`.page.ts` are treated as routable pages. Co-located helpers (e.g. `utils/`, `*.test.tsx`) are ignored by the router.
 - `src/contexts/ThemeContext.tsx` - Light/dark mode provider, wired in `_app.page.tsx`. Components opt into dark variants via Tailwind `dark:` classes.
 - `isso-server/` - Self-hosted [Isso](https://posativ.org/isso/) comment server (Dockerfile + `isso.conf`) deployed to Render via `render.yaml`. The Next.js client loads `embed.min.js` from `NEXT_PUBLIC_ISSO_URL`.
+- `scripts/post-microdose/` - Standalone Node ESM ingestion pipeline (own `package.json` / `node_modules`, **not** part of the Next app's deps). Polls 10 psychedelic-news RSS feeds → keyword filter → Mozilla Readability fetches the full source article → Gemini translates HTML → uploads `og:image` as a Contentful Asset → publishes a `pageBlogPostWithHtml` entry → broadcasts a stripped-text version to multiple Telegram chats. Runs daily via `~/Library/LaunchAgents/com.shenghao.microdose.plist` (LaunchAgent's `StartCalendarInterval` catches up missed firings on wake/login). See its own section below for invocation flags and operational details.
 
 ### Custom Styling
 - Uses Tailwind CSS with custom design tokens from `@contentful/f36-tokens`
@@ -94,6 +95,27 @@ When modifying GraphQL queries:
 - Draft content accessible via `/api/draft?secret=<token>&slug=<slug>`
 - Disable with `/api/disable-draft`
 - Live updates enabled in development and preview modes
+
+### RSS ingestion pipeline (`scripts/post-microdose/`)
+Replaces an old n8n workflow on GCP that polled a single Substack feed. Now Mac-local. Key files:
+- `post-microdose.js` - main ESM entry point. Modes (CLI flags): `--seed` (mark all current feed items as seen without processing — run once before going live), `--test-telegram <feed>` (translate latest item, broadcast to Telegram, no Contentful, no state save), `--test-contentful <feed>` (publish to Contentful, no Telegram, no state save), `--delete-slug <slug>` (unpublish + delete entry **and** its `featuredImage` asset). With no flag, runs the full production pipeline.
+- `run.sh` - launchd wrapper. Sources nvm so the right `node` is on PATH after upgrades, and exports the macOS keychain (System + SystemRoots + login) into `~/.cache/post-microdose-ca-bundle.pem` then sets `NODE_EXTRA_CA_CERTS`. The keychain export is what makes the script work on networks with TLS-inspecting firewalls (FortiGate, Zscaler, etc.) — Node's bundled CA list doesn't see corporate roots installed in the macOS keychain.
+- `state.json` - persistent dedupe set (`{seen: [...]}` capped at 2000 entries, ~1 month of memory). Saved after each item — both successful posts and keyword-filter skips. **Don't delete this file** unless you intend a re-flood.
+- `validate-feeds.mjs` / `dry-run-filter.mjs` - one-off diagnostics. Re-runnable: validate adds + preview which items the keyword filter would keep without burning Gemini quota.
+- Source RSS list and keyword vocabulary live in `.env` (`RSS_URLS`, `KEYWORDS`); `.env.example` is a placeholder template (do **not** commit real secrets there).
+
+Behaviour worth knowing before changing it:
+- Article body comes from **Readability extraction of the source URL**, not the RSS `content:encoded` — many of the feeds (e.g. psychedelicstoday) only ship a one-paragraph teaser in RSS. The Gemini prompt is HTML-aware and instructs the model to preserve `<img>` / `<a>` / `<figure>` tags and to translate `psychedelic` strictly as 啟靈藥/啟靈 (never 迷幻藥/迷幻).
+- Featured image upload goes through Contentful's full 4-step asset flow: create draft → trigger `/process` (Contentful fetches the URL itself) → poll for processed file URL → publish. If entry create or publish then fails, `rollbackAsset()` deletes the orphan asset so retries don't pile up junk.
+- Translated HTML is what's stored in Contentful. For Telegram, `stripHtml()` collapses it back to plain text (so the Telegram message stays readable) — same translation, two presentations.
+- State save happens *after* every successful publish AND after every filter-skip — a keyword miss still marks the item as seen so we don't re-evaluate it forever.
+- Locale is `zh-Hant-TW` for all entry fields (the content type's required locale). Override via `CONTENTFUL_LOCALE` env if the model ever changes.
+- Two Telegram bots are configured (bot 1 = `@sheng_blogging_agent_n8n_bot`, bot 2 = `@psychedelic_news_zh_bot`). Bot 2 only fires if both `TELEGRAM_BOT_TOKEN_2` and `TELEGRAM_CHAT_ID_3` are set — it's an additive third destination, not a replacement.
+
+Operations:
+- Manually trigger: `launchctl start com.shenghao.microdose` then `tail -f ~/Library/Logs/microdose.{out,err}.log`.
+- Check schedule: `launchctl list | grep microdose` (PID `-` = idle, normal).
+- Re-install after editing the plist: `launchctl unload ... && launchctl load ...`.
 
 ### Comments (Isso)
 - The Isso embed script is loaded once globally in `src/pages/_app.page.tsx`, not per-page. `_app` first pings `${NEXT_PUBLIC_ISSO_URL}/js/embed.min.js` to wake the Render free-tier instance (cold starts can take 30–60s) and only injects the `<Script>` tag once the server responds.
