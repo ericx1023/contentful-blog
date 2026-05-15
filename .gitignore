@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules
 /.pnp
 .pnp.js
 
@@ -45,3 +45,9 @@ next-env.d.ts
 .idea/misc.xml
 .idea/modules.xml
 .idea/vcs.xml
+
+# Local SQLite DB (HN-style redesign). Production has its own DB on the server.
+/data/
+
+# One-off Contentful export used for migration. Not needed in repo history.
+/contentful-backup-*/

@@ -31,6 +31,7 @@
     "@contentful/f36-tokens": "^4.0.1",
     "@contentful/live-preview": "^2.11.1",
     "@contentful/rich-text-react-renderer": "^15.16.2",
+    "@libsql/client": "^0.17.3",
     "@next/bundle-analyzer": "^13.0.4",
     "@vercel/analytics": "^1.1.1",
     "dotenv": "^16.0.3",

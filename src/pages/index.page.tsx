@@ -1,134 +1,89 @@
-import { useContentfulLiveUpdates } from '@contentful/live-preview/react';
 import { GetStaticProps, InferGetStaticPropsType } from 'next';
-import { useTranslation } from 'next-i18next';
+import Head from 'next/head';
 import Link from 'next/link';
 
-import { getServerSideTranslations } from './utils/get-serverside-translations';
-
-import { ArticleHero } from '@src/components/features/article';
-import { UnifiedArticleTileGrid } from '@src/components/features/article/UnifiedArticleTileGrid';
-import { SeoFields } from '@src/components/features/seo';
+import { listPosts, type PostListItem } from '@src/lib/db';
 import { Container } from '@src/components/shared/container';
-import {
-  PageBlogPost,
-  PageBlogPostOrder,
-  PageBlogPostWithHtmlOrder,
-} from '@src/lib/__generated/sdk';
-import { client, previewClient } from '@src/lib/client';
-import { revalidateDuration } from '@src/pages/utils/constants';
-import { ArticleType, mergeAndSortArticles } from '@src/types/article';
 
-const Page = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
-  const { t } = useTranslation();
+const REVALIDATE_SECONDS = 60;
 
-  const page = useContentfulLiveUpdates(props.page);
-  const standardPosts = useContentfulLiveUpdates(props.standardPosts);
-  const htmlPosts = useContentfulLiveUpdates(props.htmlPosts);
+function timeAgo(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(ms / 60_000);
+  if (minutes < 60) return minutes <= 1 ? '剛剛' : `${minutes} 分鐘前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} 小時前`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days} 天前`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} 個月前`;
+  return `${Math.floor(months / 12)} 年前`;
+}
 
-  if (!standardPosts && !htmlPosts) return;
+function sourceDomain(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
 
-  // 合併並排序文章，獲取所有文章
-  const allPosts = mergeAndSortArticles(standardPosts, htmlPosts);
-
-  // 使用最新的文章作為精選文章
-  const featuredArticle = allPosts[0];
-  // 剩餘的文章顯示在網格中
-  const remainingPosts = allPosts.slice(1);
-
-  if (!featuredArticle) return;
-
-  // 為 ArticleHero 創建兼容的文章對象
-  const featuredArticleForHero = {
-    __typename: 'PageBlogPost' as const,
-    sys: featuredArticle.sys,
-    slug: featuredArticle.slug,
-    title: featuredArticle.title,
-    internalName: featuredArticle.internalName,
-    publishedDate: featuredArticle.publishedDate,
-    shortDescription: featuredArticle.shortDescription || null,
-    author: featuredArticle.author,
-    featuredImage: featuredArticle.featuredImage,
-  };
-
+const Page = ({ posts }: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
     <>
-      {page?.seoFields && <SeoFields {...page.seoFields} />}
-      <Container>
-        <Link
-          href={`/${featuredArticle.articleType === ArticleType.MARKDOWN ? 'html-posts/' : ''}${
-            featuredArticle.slug
-          }`}
-        >
-          <ArticleHero article={featuredArticleForHero} />
-        </Link>
-      </Container>
-
-      {/* Tutorial: contentful-and-the-starter-template.md */}
-      {/* Uncomment the line below to make the Greeting field available to render */}
-      {/*<Container>*/}
-      {/*  <div className="my-5 bg-colorTextLightest p-5 text-colorBlueLightest">{page.greeting}</div>*/}
-      {/*</Container>*/}
-
-      <Container className="my-8 md:mb-10 lg:mb-16">
-        <h2 className="mb-4 md:mb-6">{t('landingPage.latestArticles')}</h2>
-        <UnifiedArticleTileGrid
-          className="md:grid-cols-2 lg:grid-cols-3"
-          articles={remainingPosts}
-        />
+      <Head>
+        <title>Psyche Valley</title>
+        <meta name="description" content="啟靈藥相關文章與筆記" />
+      </Head>
+      <Container className="my-6">
+        <ol className="space-y-3">
+          {posts.map((post, i) => {
+            const domain = sourceDomain(post.source_url);
+            return (
+              <li key={post.slug} className="flex gap-3">
+                <span className="text-gray-400 dark:text-gray-500 w-8 shrink-0 text-right text-sm tabular-nums">
+                  {i + 1}.
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline gap-x-2">
+                    <Link href={`/${post.slug}`} className="text-base font-medium hover:underline">
+                      {post.title}
+                    </Link>
+                    {domain && (
+                      <span className="text-gray-500 dark:text-gray-400 text-xs">({domain})</span>
+                    )}
+                  </div>
+                  {post.subtitle && (
+                    <p className="line-clamp-1 text-gray-600 dark:text-gray-400 mt-0.5 text-sm">
+                      {post.subtitle}
+                    </p>
+                  )}
+                  <div className="text-gray-500 dark:text-gray-400 mt-1 text-xs">
+                    {post.clicks} 點擊
+                    {' · '}
+                    {post.author_name ? `by ${post.author_name}` : 'RSS'}
+                    {' · '}
+                    {timeAgo(post.published_at)}
+                    {' · '}
+                    {post.comments_cached} 留言
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
       </Container>
     </>
   );
 };
 
-export const getStaticProps: GetStaticProps = async ({ locale, draftMode: preview }) => {
-  try {
-    const gqlClient = preview ? previewClient : client;
-
-    const landingPageData = await gqlClient.pageLanding({ locale, preview });
-    const page = landingPageData.pageLandingCollection?.items[0];
-
-    // 獲取標準部落格文章 - 獲取所有文章，不再排除任何文章
-    const standardBlogPostsData = await gqlClient.pageBlogPostCollection({
-      limit: 10,
-      locale,
-      order: PageBlogPostOrder.PublishedDateDesc,
-      preview,
-    });
-    const standardPosts = standardBlogPostsData.pageBlogPostCollection?.items;
-
-    // 獲取 Markdown 部落格文章
-    const htmlBlogPostsData = await gqlClient.pageBlogPostWithHtmlCollection({
-      limit: 10,
-      locale,
-      order: PageBlogPostWithHtmlOrder.SysPublishedAtDesc, // 使用系統發布時間排序
-      preview,
-    });
-    const htmlPosts = htmlBlogPostsData.pageBlogPostWithHtmlCollection?.items;
-
-    // 檢查是否至少有一篇文章
-    if ((!standardPosts || standardPosts.length === 0) && (!htmlPosts || htmlPosts.length === 0)) {
-      return {
-        revalidate: revalidateDuration,
-        notFound: true,
-      };
-    }
-
-    return {
-      revalidate: revalidateDuration,
-      props: {
-        previewActive: !!preview,
-        ...(await getServerSideTranslations(locale)),
-        page: page || null,
-        standardPosts: standardPosts || [],
-        htmlPosts: htmlPosts || [],
-      },
-    };
-  } catch {
-    return {
-      revalidate: revalidateDuration,
-      notFound: true,
-    };
-  }
+export const getStaticProps: GetStaticProps<{ posts: PostListItem[] }> = async () => {
+  const posts = await listPosts();
+  return {
+    revalidate: REVALIDATE_SECONDS,
+    props: { posts },
+  };
 };
 
 export default Page;

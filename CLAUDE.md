@@ -34,6 +34,21 @@ Required environment variables (see `.env.example`):
 
 ## Architecture
 
+> ⚠️ **Migration in progress (2026-06):** the site is being rewritten as a Hacker News-style
+> SQLite-backed blog and Contentful is being decommissioned. The Contentful-flavoured
+> sections below describe **legacy** code that still exists but is being phased out.
+> Current state of the migration:
+> - `src/pages/index.page.tsx`, `src/pages/[slug].page.tsx`, `src/pages/api/click.page.ts` —
+>   already rewritten to read from `data/posts.db` (or Turso in prod) via `src/lib/db.ts`.
+> - `src/pages/html-posts/` — **deleted**. `/html-posts/:slug` → `/:slug` redirect lives in
+>   `next.config.js`.
+> - `scripts/post-microdose/post-microdose.js` — now writes to SQLite + `public/images/`
+>   instead of Contentful.
+> - Still-Contentful (slated for removal): `src/lib/{__generated,graphql,client.ts,extended-sdk.ts}`,
+>   `src/components/features/{article,contentful,seo,language-selector}/`,
+>   `src/pages/api/{draft,disable-draft}.page.tsx`, `src/pages/sitemap.xml/`, `codegen.ts`,
+>   `next-i18next.config.js`, `public/locales/`. Don't introduce new code that depends on these.
+
 ### Dual Content Type System
 The application supports two types of articles:
 1. **Standard Articles** - Using Contentful's rich text fields
@@ -62,8 +77,8 @@ Both are unified through:
   - `html-posts/[slug].page.tsx` - Markdown article pages
   - Note: `next.config.js` sets `pageExtensions: ['page.tsx', ...]`, so only files ending in `.page.tsx`/`.page.ts` are treated as routable pages. Co-located helpers (e.g. `utils/`, `*.test.tsx`) are ignored by the router.
 - `src/contexts/ThemeContext.tsx` - Light/dark mode provider, wired in `_app.page.tsx`. Components opt into dark variants via Tailwind `dark:` classes.
-- `isso-server/` - Self-hosted [Isso](https://posativ.org/isso/) comment server (Dockerfile + `isso.conf`) deployed to Render via `render.yaml`. The Next.js client loads `embed.min.js` from `NEXT_PUBLIC_ISSO_URL`.
-- `scripts/post-microdose/` - Standalone Node ESM ingestion pipeline (own `package.json` / `node_modules`, **not** part of the Next app's deps). Polls 10 psychedelic-news RSS feeds → keyword filter → Mozilla Readability fetches the full source article → Gemini translates HTML → uploads `og:image` as a Contentful Asset → publishes a `pageBlogPostWithHtml` entry → broadcasts a stripped-text version to multiple Telegram chats. Runs daily via `~/Library/LaunchAgents/com.shenghao.microdose.plist` (LaunchAgent's `StartCalendarInterval` catches up missed firings on wake/login). See its own section below for invocation flags and operational details.
+- `isso-server/` - Self-hosted [Isso](https://posativ.org/isso/) comment server. Runs in Docker on a GCP free-tier e2-micro VM, fronted by Cloudflare Tunnel (no public ports on the VM). `docker-compose.yml` defines two services: `isso` (Python app with SQLite persisted to `~/isso-data` on the host) and `cloudflared` (tunnel to `comments.psychevalley.org`). The Next.js client loads `embed.min.js` from `NEXT_PUBLIC_ISSO_URL`. Setup runbook: `isso-server/README.md`. `render.yaml` is deprecated and can be deleted after the GCP cutover is verified.
+- `scripts/post-microdose/` - Standalone Node ESM ingestion pipeline (own `package.json` / `node_modules`, **not** part of the Next app's deps). Polls 10 psychedelic-news RSS feeds → keyword filter → Mozilla Readability fetches the full source article → Gemini translates HTML → 迷幻→啟靈 sanity rewrite → downloads `og:image` to `public/images/<assetId>/<filename>` → inserts a `posts` row (plus a `post_stats` row) into SQLite via `@libsql/client` → broadcasts a stripped-text version to multiple Telegram chats. Runs daily via `~/Library/LaunchAgents/com.shenghao.microdose.plist` (LaunchAgent's `StartCalendarInterval` catches up missed firings on wake/login). DB target is `TURSO_DATABASE_URL` if set, otherwise the local file at `data/posts.db`. See its own section below for invocation flags and operational details. **Sibling helpers `post-custom.mjs` and `post-from-email.mjs` still write to Contentful and need the same migration before they can be used again.**
 
 ### Custom Styling
 - Uses Tailwind CSS with custom design tokens from `@contentful/f36-tokens`
@@ -98,7 +113,7 @@ When modifying GraphQL queries:
 
 ### RSS ingestion pipeline (`scripts/post-microdose/`)
 Replaces an old n8n workflow on GCP that polled a single Substack feed. Now Mac-local. Key files:
-- `post-microdose.js` - main ESM entry point. Modes (CLI flags): `--seed` (mark all current feed items as seen without processing — run once before going live), `--test-telegram <feed>` (translate latest item, broadcast to Telegram, no Contentful, no state save), `--test-contentful <feed>` (publish to Contentful, no Telegram, no state save), `--delete-slug <slug>` (unpublish + delete entry **and** its `featuredImage` asset). With no flag, runs the full production pipeline.
+- `post-microdose.js` - main ESM entry point. Modes (CLI flags): `--seed` (mark all current feed items as seen without processing — run once before going live), `--test-telegram <feed>` (translate latest item, broadcast to Telegram, no DB, no state save), `--test-db <feed>` (publish to SQLite, no Telegram, no state save — old `--test-contentful` flag still works as an alias during the cutover), `--delete-slug <slug>` (delete the `posts` row, ON DELETE CASCADE clears `post_stats`, and removes the local image at `public/images/<assetId>/<filename>`). With no flag, runs the full production pipeline.
 - `run.sh` - launchd wrapper. Sources nvm so the right `node` is on PATH after upgrades, and exports the macOS keychain (System + SystemRoots + login) into `~/.cache/post-microdose-ca-bundle.pem` then sets `NODE_EXTRA_CA_CERTS`. The keychain export is what makes the script work on networks with TLS-inspecting firewalls (FortiGate, Zscaler, etc.) — Node's bundled CA list doesn't see corporate roots installed in the macOS keychain.
 - `state.json` - persistent dedupe set (`{seen: [...]}` capped at 2000 entries, ~1 month of memory). Saved after each item — both successful posts and keyword-filter skips. **Don't delete this file** unless you intend a re-flood.
 - `validate-feeds.mjs` / `dry-run-filter.mjs` - one-off diagnostics. Re-runnable: validate adds + preview which items the keyword filter would keep without burning Gemini quota.
@@ -106,10 +121,12 @@ Replaces an old n8n workflow on GCP that polled a single Substack feed. Now Mac-
 
 Behaviour worth knowing before changing it:
 - Article body comes from **Readability extraction of the source URL**, not the RSS `content:encoded` — many of the feeds (e.g. psychedelicstoday) only ship a one-paragraph teaser in RSS. The Gemini prompt is HTML-aware and instructs the model to preserve `<img>` / `<a>` / `<figure>` tags and to translate `psychedelic` strictly as 啟靈藥/啟靈 (never 迷幻藥/迷幻).
-- Featured image upload goes through Contentful's full 4-step asset flow: create draft → trigger `/process` (Contentful fetches the URL itself) → poll for processed file URL → publish. If entry create or publish then fails, `rollbackAsset()` deletes the orphan asset so retries don't pile up junk.
-- Translated HTML is what's stored in Contentful. For Telegram, `stripHtml()` collapses it back to plain text (so the Telegram message stays readable) — same translation, two presentations.
+- Featured image is downloaded directly to `public/images/<assetId>/<filename>` where `<assetId>` is a 22-char base64url ID generated via `crypto.randomBytes(16)` (mimics Contentful's old ID shape so paths stay uniform with pre-migration data). Special chars in filenames are sanitised to `_` to match what the Contentful CLI did when downloading the historical assets. If the SQLite `INSERT` then fails, `removeLocalImage()` deletes the orphan file so retries don't accumulate.
+- Translated HTML is stored in `posts.body_html` (single column, single locale — there's no Contentful-style locale map anymore). For Telegram, `stripHtml()` collapses it back to plain text (so the Telegram message stays readable) — same translation, two presentations.
+- 迷幻→啟靈 sanity rewrite (`applyPsychedelicRewrite`) runs on every published title + body before the SQLite INSERT and before the Telegram broadcast. Gemini's prompt asks for it but isn't 100% reliable; the post-hoc string replace is the safety net. Per-post counts get logged so a sudden spike points at Gemini regressing.
+- Slug uniqueness: `posts.slug` has a `UNIQUE` constraint. `uniqueSlug()` looks up the slug first and appends today's date (`-YYYYMMDD`) if it would collide, so a duplicate title never crashes the daily run.
 - State save happens *after* every successful publish AND after every filter-skip — a keyword miss still marks the item as seen so we don't re-evaluate it forever.
-- Locale is `zh-Hant-TW` for all entry fields (the content type's required locale). Override via `CONTENTFUL_LOCALE` env if the model ever changes.
+- DB connection: `@libsql/client` opens `TURSO_DATABASE_URL` if set (Turso libsql remote), otherwise `file:./data/posts.db` relative to the repo root. The pipeline runs on the Mac, so the local file path is what the daily run hits in practice; Turso is reserved for production reads.
 - Two Telegram bots are configured (bot 1 = `@sheng_blogging_agent_n8n_bot`, bot 2 = `@psychedelic_news_zh_bot`). Bot 2 only fires if both `TELEGRAM_BOT_TOKEN_2` and `TELEGRAM_CHAT_ID_3` are set — it's an additive third destination, not a replacement.
 
 Operations:
@@ -117,12 +134,14 @@ Operations:
 - Check schedule: `launchctl list | grep microdose` (PID `-` = idle, normal).
 - Re-install after editing the plist: `launchctl unload ... && launchctl load ...`.
 
-### Comments (Isso)
-- The Isso embed script is loaded once globally in `src/pages/_app.page.tsx`, not per-page. `_app` first pings `${NEXT_PUBLIC_ISSO_URL}/js/embed.min.js` to wake the Render free-tier instance (cold starts can take 30–60s) and only injects the `<Script>` tag once the server responds.
+### Comments (Isso on GCP)
+- The Isso embed script is loaded once globally in `src/pages/_app.page.tsx`, not per-page. The Render-era cold-start wake-up logic in `_app` (`wakeUpIssoServer()`) is now vestigial — the GCP VM doesn't sleep — but it does no harm and can be removed in a cleanup pass.
 - Per-page rendering lives in `src/components/shared/Comments.tsx`, which creates an `#isso-thread` element keyed on the route and calls `window.Isso.init()`. It coordinates with `_app` via the `window.issoScriptLoaded` / `window.issoLoadFailed` flags — preserve that contract when changing either file.
-- CSP in `config/headers.js` must allow the Isso origin (script-src, connect-src, frame-src). Update it whenever `NEXT_PUBLIC_ISSO_URL` changes.
-- `node scripts/test-isso-server.js` probes the server's embed and main endpoints; useful when debugging cold-start or CORS issues.
-- Background and rationale: `docs/isso-cold-start-solution.md` (in 繁體中文).
+- CSP in `config/headers.js` allows `https://comments.psychevalley.org` in `script-src`, `style-src`, and `connect-src`. Update all three whenever `NEXT_PUBLIC_ISSO_URL` changes.
+- Server lives on a GCP free-tier e2-micro VM (us-central1 or us-west1), fronted by Cloudflare Tunnel — no public ports open on the VM. SQLite db at `~/isso-data/comments.db` on the host (mounted into the container). Persistent disk = no data loss across reboots/maintenance. Operational runbook: `isso-server/README.md`.
+- Admin UI: `https://comments.psychevalley.org/admin` (password set in `isso.conf` on the VM — committed copy has `REPLACE_ME_BEFORE_DEPLOY`).
+- Backup: `cp ~/isso-data/comments.db ~/isso-data/comments.db.$(date +%F)` (manual; the VM disk is already redundant, so backups are belt-and-braces).
+- `node scripts/test-isso-server.js` probes the embed and main endpoints; useful when debugging tunnel or DNS issues. `docs/isso-cold-start-solution.md` is Render-era and obsolete — delete in cleanup.
 
 ## Testing and Quality
 

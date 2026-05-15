@@ -58,7 +58,16 @@ module.exports = withPlugins(plugins, {
    * Settings are the defaults
    */
   images: {
-    domains: ['images.ctfassets.net','images.eu.ctfassets.net'],
+    domains: ['images.ctfassets.net', 'images.eu.ctfassets.net'],
+  },
+
+  // Legacy URL compatibility: old RSS posts were published at /html-posts/<slug>.
+  // The unified detail route now lives at /<slug>, so redirect old links.
+  async redirects() {
+    return [
+      { source: '/html-posts/:slug', destination: '/:slug', permanent: true },
+      { source: '/html-posts', destination: '/', permanent: true },
+    ];
   },
 
   pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],

@@ -7,6 +7,7 @@
     "start": "node post-microdose.js"
   },
   "dependencies": {
+    "@libsql/client": "^0.14.0",
     "@mozilla/readability": "^0.5.0",
     "dotenv": "^16.4.5",
     "jsdom": "^24.1.1",

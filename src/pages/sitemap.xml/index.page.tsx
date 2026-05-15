@@ -1,50 +1,32 @@
-import path from 'path';
-
 import { GetServerSideProps } from 'next';
-import { getServerSideSitemap } from 'next-sitemap';
+import { getServerSideSitemap, ISitemapField } from 'next-sitemap';
 
-import { SitemapPagesFieldsFragment } from '@src/lib/__generated/sdk';
-import { client } from '@src/lib/client';
-
-type SitemapFieldsWithoutTypename = Omit<SitemapPagesFieldsFragment, '__typename'>;
-type SitemapPageCollection = SitemapFieldsWithoutTypename[keyof SitemapFieldsWithoutTypename];
+import { db } from '@src/lib/db';
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { locales } = ctx;
+  ctx.res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=3600');
 
-  ctx.res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
+  const base = (process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
 
-  const promiseArr = locales?.map(locale => client.sitemapPages({ locale })).filter(Boolean) || [];
-  const dataPerLocale: SitemapFieldsWithoutTypename[] = await Promise.all(promiseArr);
+  const rs = await db.execute(`
+    SELECT slug, COALESCE(updated_at, published_at) AS lastmod
+    FROM posts
+    ORDER BY published_at DESC
+  `);
 
-  const fields = dataPerLocale
-    .map((localeData, index) =>
-      Object.values(localeData).flatMap((pageCollection: SitemapPageCollection) =>
-        pageCollection?.items.map(item => {
-          const localeForUrl =
-            locales?.[index] === ctx.defaultLocale ? undefined : locales?.[index];
-
-          const url = new URL(
-            path.join(localeForUrl || '', item?.slug || ''),
-            process.env.NEXT_PUBLIC_BASE_URL!,
-          ).toString();
-          return item && !item.seoFields?.excludeFromSitemap
-            ? {
-                loc: url,
-                lastmod: item.sys.publishedAt,
-              }
-            : undefined;
-        }),
-      ),
-    )
-    .flat()
-    .filter(Boolean);
+  const fields: ISitemapField[] = [
+    { loc: `${base}/`, lastmod: new Date().toISOString(), changefreq: 'hourly', priority: 1.0 },
+    ...rs.rows.map(row => ({
+      loc: `${base}/${row.slug as string}`,
+      lastmod: new Date(row.lastmod as string).toISOString(),
+      changefreq: 'weekly' as const,
+      priority: 0.7,
+    })),
+  ];
 
   return getServerSideSitemap(ctx, fields);
 };
 
-const Sitemap = () => {
-  return null;
-};
+const Sitemap = () => null;
 
 export default Sitemap;

@@ -4,39 +4,50 @@ import { Readability } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
+import { createClient as createLibsqlClient } from '@libsql/client';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const STATE_FILE = path.join(__dirname, 'state.json');
+const REPO_ROOT = path.resolve(__dirname, '../..');
+const PUBLIC_IMAGES = path.join(REPO_ROOT, 'public', 'images');
+const LOCAL_DB_PATH = path.join(REPO_ROOT, 'data', 'posts.db');
 
 const argv = process.argv.slice(2);
 const SEED_MODE = argv.includes('--seed');
 const testFlagIdx = argv.indexOf('--test-telegram');
 const TEST_TELEGRAM_FEED = testFlagIdx >= 0 ? argv[testFlagIdx + 1] : null;
 const TEST_MODE = Boolean(TEST_TELEGRAM_FEED);
-const cfFlagIdx = argv.indexOf('--test-contentful');
-const TEST_CONTENTFUL_FEED = cfFlagIdx >= 0 ? argv[cfFlagIdx + 1] : null;
-const TEST_CONTENTFUL_MODE = Boolean(TEST_CONTENTFUL_FEED);
+// --test-db replaces --test-contentful; the old flag stays as an alias so any saved
+// muscle-memory commands keep working through the cutover.
+const dbFlagIdx = argv.findIndex((a) => a === '--test-db' || a === '--test-contentful');
+const TEST_DB_FEED = dbFlagIdx >= 0 ? argv[dbFlagIdx + 1] : null;
+const TEST_DB_MODE = Boolean(TEST_DB_FEED);
 const delSlugIdx = argv.indexOf('--delete-slug');
 const DELETE_SLUG = delSlugIdx >= 0 ? argv[delSlugIdx + 1] : null;
 const DELETE_MODE = Boolean(DELETE_SLUG);
+const dryRunIdx = argv.indexOf('--dry-run');
+const DRY_RUN_FEED = dryRunIdx >= 0 ? argv[dryRunIdx + 1] : null;
+const DRY_RUN_MODE = Boolean(DRY_RUN_FEED);
 
 const REQUIRED_ENV = SEED_MODE
   ? []
-  : DELETE_MODE
-    ? ['CONTENTFUL_SPACE_ID', 'CONTENTFUL_CMA_TOKEN']
-    : TEST_MODE
-      ? ['GEMINI_API_KEY', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID_1', 'TELEGRAM_CHAT_ID_2']
-      : TEST_CONTENTFUL_MODE
-        ? ['GEMINI_API_KEY', 'CONTENTFUL_SPACE_ID', 'CONTENTFUL_CMA_TOKEN']
-        : [
-            'GEMINI_API_KEY',
-            'CONTENTFUL_SPACE_ID',
-            'CONTENTFUL_CMA_TOKEN',
-            'TELEGRAM_BOT_TOKEN',
-            'TELEGRAM_CHAT_ID_1',
-            'TELEGRAM_CHAT_ID_2',
-          ];
+  : DRY_RUN_MODE
+    ? ['GEMINI_API_KEY']
+    : DELETE_MODE
+      ? []
+      : TEST_MODE
+        ? ['GEMINI_API_KEY', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID_1', 'TELEGRAM_CHAT_ID_2']
+        : TEST_DB_MODE
+          ? ['GEMINI_API_KEY']
+          : [
+              'GEMINI_API_KEY',
+              'TELEGRAM_BOT_TOKEN',
+              'TELEGRAM_CHAT_ID_1',
+              'TELEGRAM_CHAT_ID_2',
+            ];
 for (const k of REQUIRED_ENV) {
   if (!process.env[k]) {
     console.error(`Missing required env var: ${k}`);
@@ -47,10 +58,8 @@ for (const k of REQUIRED_ENV) {
 const {
   GEMINI_API_KEY,
   GEMINI_MODEL = 'gemini-flash-latest',
-  CONTENTFUL_SPACE_ID,
-  CONTENTFUL_CMA_TOKEN,
-  CONTENTFUL_ENV = 'master',
-  CONTENTFUL_TYPE = 'pageBlogPostWithHtml',
+  TURSO_DATABASE_URL,
+  TURSO_AUTH_TOKEN,
   TELEGRAM_BOT_TOKEN,
   TELEGRAM_CHAT_ID_1,
   TELEGRAM_THREAD_ID_1,
@@ -61,6 +70,11 @@ const {
   RSS_URL = 'https://themicrodose.substack.com/feed',
   RSS_URLS,
 } = process.env;
+
+const db = createLibsqlClient({
+  url: TURSO_DATABASE_URL ?? `file:${LOCAL_DB_PATH}`,
+  authToken: TURSO_AUTH_TOKEN,
+});
 
 const FEED_URLS = (RSS_URLS || RSS_URL)
   .split(/[\s,]+/)
@@ -108,6 +122,25 @@ function matchKeyword(item) {
 }
 
 const log = (...args) => console.log(`[${new Date().toISOString()}]`, ...args);
+
+// True only for the unflagged daily pipeline (not seed/test/delete runs), so the
+// "quiet day" / failure notifications below never fire during manual test runs.
+const IS_PRODUCTION_RUN =
+  !SEED_MODE && !TEST_MODE && !TEST_DB_MODE && !DELETE_MODE && !DRY_RUN_MODE;
+
+// Pop a macOS notification banner. Used to flag days the daily run posted nothing:
+// Telegram already covers the days that DO post, so silence there = no signal. This
+// fills that gap. Wrapped in try/catch so a notification failure never breaks the run.
+function notifyMac(title, message) {
+  try {
+    execFileSync('osascript', [
+      '-e',
+      `display notification ${JSON.stringify(message)} with title ${JSON.stringify(title)}`,
+    ]);
+  } catch (e) {
+    console.error(`  ⚠️ macOS notification failed: ${String(e.message).slice(0, 120)}`);
+  }
+}
 
 async function loadState() {
   try {
@@ -202,7 +235,7 @@ async function translate(title, content) {
    - 連結 <a href="..."> 的 href 不要翻譯，只翻譯顯示文字。
    - HTML 屬性名稱、CSS class、URL 一律不要翻譯。
    - 如果輸入是純文字，輸出也是純文字（不要硬加 HTML 標籤）。
-5. 如果翻譯內容過長，請濃縮摘要，總字數（不含 HTML 標籤）盡量不超過 8000 字。
+5. 內容必須是「完整的一篇」：務必翻譯／濃縮到文章真正的結尾，最後一句話要完整，所有 HTML 標籤都要正確閉合，**嚴禁在句子或標籤中途停止**。若原文很長，請更積極地濃縮（總字數不含 HTML 標籤控制在 6000 字以內），寧可摘要得更精簡，也不要寫到一半就中斷。
 6. 專有名詞翻譯對照（必須嚴格遵守）：
    - "psychedelic" / "psychedelics"（名詞，指物質）→ 啟靈藥
    - "psychedelic"（形容詞）→ 啟靈（例：psychedelic therapy → 啟靈療法；psychedelic experience → 啟靈體驗）
@@ -218,217 +251,231 @@ async function translate(title, content) {
 }`;
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(`Gemini ${res.status}: ${await res.text()}`);
-  }
-  const json = await res.json();
-  const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error(`Gemini returned no text: ${JSON.stringify(json)}`);
-  const cleaned = text.replace(/```json|```/g, '').trim();
-  return JSON.parse(cleaned);
-}
 
-async function uploadAsset({ imageUrl, title, base, auth, locale }) {
-  const fileName = (imageUrl.split('/').pop() || 'featured.jpg').split('?')[0].slice(0, 80);
-  const ext = (fileName.match(/\.(\w+)$/)?.[1] || 'jpg').toLowerCase();
-  const contentType =
-    { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' }[ext] ||
-    'image/jpeg';
-
-  const createRes = await fetch(`${base}/assets`, {
-    method: 'POST',
-    headers: auth,
-    body: JSON.stringify({
-      fields: {
-        title: { [locale]: title.slice(0, 200) },
-        file: { [locale]: { contentType, fileName, upload: imageUrl } },
-      },
-    }),
-  });
-  if (!createRes.ok) throw new Error(`asset create ${createRes.status}: ${await createRes.text()}`);
-  const asset = await createRes.json();
-
-  const procRes = await fetch(`${base}/assets/${asset.sys.id}/files/${locale}/process`, {
-    method: 'PUT',
-    headers: { ...auth, 'X-Contentful-Version': String(asset.sys.version) },
-  });
-  if (!procRes.ok) throw new Error(`asset process ${procRes.status}: ${await procRes.text()}`);
-
-  // Poll until Contentful has fetched + processed the file.
-  let processed = null;
-  for (let i = 0; i < 25; i++) {
-    await new Promise((r) => setTimeout(r, 800));
-    const getRes = await fetch(`${base}/assets/${asset.sys.id}`, {
-      headers: { Authorization: auth.Authorization },
+  const requestOnce = async () => {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        // Force structured JSON: the API serializes the strings, so unescaped
+        // quotes/newlines inside the translated HTML can no longer break parsing
+        // (the old failure mode — see post-microdose.js translate JSON.parse crash).
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'object',
+            properties: {
+              title: { type: 'string' },
+              content: { type: 'string' },
+            },
+            required: ['title', 'content'],
+          },
+          // HTML body can be long; raise the ceiling so the JSON isn't truncated
+          // mid-string (which would still produce unparseable output).
+          maxOutputTokens: 32768,
+          temperature: 0.2,
+        },
+      }),
     });
-    const a = await getRes.json();
-    if (a.fields?.file?.[locale]?.url) {
-      processed = a;
-      break;
+    if (!res.ok) {
+      throw new Error(`Gemini ${res.status}: ${await res.text()}`);
     }
-  }
-  if (!processed) throw new Error('asset processing timed out after 20s');
-
-  const pubRes = await fetch(`${base}/assets/${processed.sys.id}/published`, {
-    method: 'PUT',
-    headers: { ...auth, 'X-Contentful-Version': String(processed.sys.version) },
-  });
-  if (!pubRes.ok) throw new Error(`asset publish ${pubRes.status}: ${await pubRes.text()}`);
-  return processed.sys.id;
-}
-
-async function deleteEntryBySlug(slug) {
-  const base = `https://api.contentful.com/spaces/${CONTENTFUL_SPACE_ID}/environments/${CONTENTFUL_ENV}`;
-  const auth = {
-    Authorization: `Bearer ${CONTENTFUL_CMA_TOKEN}`,
-    'Content-Type': 'application/vnd.contentful.management.v1+json',
+    const json = await res.json();
+    const candidate = json.candidates?.[0];
+    const text = candidate?.content?.parts?.[0]?.text;
+    log(`  ↳ Gemini finishReason=${candidate?.finishReason ?? '(none)'}, ${text?.length ?? 0} chars`);
+    if (candidate?.finishReason && candidate.finishReason !== 'STOP') {
+      // MAX_TOKENS / SAFETY / RECITATION → output is partial or empty; fail loud
+      // rather than publishing half-translated HTML.
+      throw new Error(`Gemini stopped early (finishReason=${candidate.finishReason})`);
+    }
+    if (!text) throw new Error(`Gemini returned no text: ${JSON.stringify(json).slice(0, 500)}`);
+    return parseTranslation(text);
   };
-  const locale = process.env.CONTENTFUL_LOCALE || 'zh-Hant-TW';
 
-  const findUrl =
-    `${base}/entries?content_type=${encodeURIComponent(CONTENTFUL_TYPE)}` +
-    `&fields.slug.${locale}=${encodeURIComponent(slug)}`;
-  const findRes = await fetch(findUrl, { headers: { Authorization: auth.Authorization } });
-  if (!findRes.ok) {
-    throw new Error(`find ${findRes.status}: ${await findRes.text()}`);
+  // Gemini occasionally stops mid-tag (finishReason still STOP) — see the Chacruna
+  // dry-run that ended at `…target="_blank`. That renders as broken HTML, so retry a
+  // few times and, only if every attempt is truncated, publish the longest one with
+  // the dangling tag trimmed off rather than failing the whole item.
+  const MAX_ATTEMPTS = 2;
+  let best = null;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const result = await requestOnce();
+    if (!looksTruncated(result.content)) return result;
+    log(`  ⚠️ translation ends mid-tag (attempt ${attempt}/${MAX_ATTEMPTS}) — retrying`);
+    if (!best || result.content.length > best.content.length) best = result;
   }
-  const found = await findRes.json();
-  if (!found.items || found.items.length === 0) {
-    log(`No entry with slug "${slug}" found.`);
-    return 0;
-  }
-
-  let deletedCount = 0;
-  for (const entry of found.items) {
-    const entryId = entry.sys.id;
-    const title = entry.fields.title?.[locale] || '(no title)';
-    const assetId = entry.fields.featuredImage?.[locale]?.sys?.id || null;
-    log(`Deleting entry ${entryId} — "${title}"`);
-
-    if (entry.sys.publishedVersion) {
-      const r = await fetch(`${base}/entries/${entryId}/published`, {
-        method: 'DELETE',
-        headers: auth,
-      });
-      if (r.ok) log(`  ↳ unpublished`);
-      else log(`  ⚠️ unpublish ${r.status}: ${(await r.text()).slice(0, 120)}`);
-    }
-    const dr = await fetch(`${base}/entries/${entryId}`, { method: 'DELETE', headers: auth });
-    if (!dr.ok) {
-      log(`  ⚠️ delete ${dr.status}: ${(await dr.text()).slice(0, 120)}`);
-      continue;
-    }
-    log(`  ↳ entry deleted`);
-    deletedCount++;
-
-    if (assetId) {
-      try {
-        const ar = await fetch(`${base}/assets/${assetId}`, {
-          headers: { Authorization: auth.Authorization },
-        });
-        if (ar.ok) {
-          const asset = await ar.json();
-          if (asset.sys.publishedVersion) {
-            await fetch(`${base}/assets/${assetId}/published`, {
-              method: 'DELETE',
-              headers: auth,
-            });
-          }
-          const ad = await fetch(`${base}/assets/${assetId}`, {
-            method: 'DELETE',
-            headers: auth,
-          });
-          if (ad.ok) log(`  ↳ associated asset ${assetId} deleted`);
-          else log(`  ⚠️ asset delete ${ad.status}`);
-        }
-      } catch (e) {
-        log(`  ⚠️ asset cleanup failed: ${String(e.message).slice(0, 80)}`);
-      }
-    }
-  }
-  return deletedCount;
+  best.content = trimDanglingTag(best.content);
+  log('  ⚠️ still truncated after retries — trimmed dangling tag, publishing best effort');
+  return best;
 }
 
-async function rollbackAsset(assetId, base, auth) {
+// True when the HTML ends with an unterminated tag (a "<" + tag name with no closing
+// ">" before end-of-string) — the signature of a mid-tag Gemini truncation.
+function looksTruncated(html) {
+  return /<[a-zA-Z][^>]*$/.test(String(html).trimEnd());
+}
+
+// Drop a trailing unterminated tag fragment so we never publish broken markup.
+function trimDanglingTag(html) {
+  return String(html).replace(/<[a-zA-Z][^>]*$/, '').trimEnd();
+}
+
+// Parse Gemini's translation payload into { title, content }. With responseMimeType
+// = application/json the text is already valid JSON, but we stay defensive: strip any
+// stray code fences, validate the shape, and throw a descriptive error (with a snippet)
+// instead of letting a raw JSON.parse SyntaxError bubble up as a fatal crash.
+function parseTranslation(text) {
+  const cleaned = text.replace(/```json|```/g, '').trim();
+  let obj;
   try {
-    const r = await fetch(`${base}/assets/${assetId}`, {
-      headers: { Authorization: auth.Authorization },
-    });
-    if (!r.ok) return;
-    const a = await r.json();
-    if (a.sys.publishedVersion) {
-      await fetch(`${base}/assets/${assetId}/published`, { method: 'DELETE', headers: auth });
-    }
-    await fetch(`${base}/assets/${assetId}`, { method: 'DELETE', headers: auth });
-    log(`  ↳ rolled back orphan asset ${assetId}`);
+    obj = JSON.parse(cleaned);
+  } catch (e) {
+    throw new Error(
+      `Gemini JSON parse failed (${String(e.message).slice(0, 80)}); head: ${cleaned.slice(0, 160)}`,
+    );
+  }
+  if (!obj || typeof obj.title !== 'string' || typeof obj.content !== 'string') {
+    throw new Error(`Gemini JSON missing title/content: ${cleaned.slice(0, 160)}`);
+  }
+  return obj;
+}
+
+// Mimic Contentful's 22-char base62-ish asset IDs so existing /images/<id>/<file>
+// path conventions stay consistent across pre-migration and post-migration data.
+function makeAssetId() {
+  return crypto.randomBytes(16).toString('base64url').slice(0, 22);
+}
+
+function sanitiseFileName(name) {
+  // Contentful CLI replaces spaces/parens/commas/quotes with _ when downloading
+  // assets — mirror that so featured paths look uniform with the migrated data.
+  return name.replace(/[ ()',!@#$&*+={}[\]]/g, '_').slice(0, 120);
+}
+
+// Download featuredImageUrl to public/images/<assetId>/<filename>. Returns
+// { assetId, publicPath, destPath } so a failed Sqlite write can clean up.
+async function downloadImageToPublic({ imageUrl }) {
+  const rawName = (imageUrl.split('/').pop() || 'featured.jpg').split('?')[0].slice(0, 80) || 'featured.jpg';
+  const fileName = sanitiseFileName(rawName);
+  const assetId = makeAssetId();
+  const destDir = path.join(PUBLIC_IMAGES, assetId);
+  const destPath = path.join(destDir, fileName);
+
+  const res = await fetch(imageUrl, {
+    headers: { 'User-Agent': BROWSER_UA, Accept: 'image/*' },
+    redirect: 'follow',
+  });
+  if (!res.ok) throw new Error(`image fetch ${res.status}`);
+  const buf = Buffer.from(await res.arrayBuffer());
+
+  await fs.mkdir(destDir, { recursive: true });
+  await fs.writeFile(destPath, buf);
+
+  return {
+    assetId,
+    destPath,
+    publicPath: `/images/${assetId}/${fileName}`,
+  };
+}
+
+async function removeLocalImage(destPath) {
+  try {
+    await fs.unlink(destPath);
+    const dir = path.dirname(destPath);
+    try { await fs.rmdir(dir); } catch { /* dir has other files — leave it */ }
+    log(`  ↳ rolled back orphan image at ${path.relative(REPO_ROOT, destPath)}`);
   } catch {
     /* best-effort cleanup */
   }
 }
 
-async function publishToContentful({ title, content, sourceUrl, slug, featuredImageUrl }) {
-  const base = `https://api.contentful.com/spaces/${CONTENTFUL_SPACE_ID}/environments/${CONTENTFUL_ENV}`;
-  const auth = {
-    Authorization: `Bearer ${CONTENTFUL_CMA_TOKEN}`,
-    'Content-Type': 'application/vnd.contentful.management.v1+json',
-  };
-  const locale = process.env.CONTENTFUL_LOCALE || 'zh-Hant-TW';
+// Apply the same 迷幻 → 啟靈 transform the migration script applied to historical
+// posts, so new RSS posts stay consistent (Gemini prompt asks for it but isn't
+// 100% reliable). Log per-post counts so we can spot Gemini regressions.
+function applyPsychedelicRewrite(text, label) {
+  if (!text || !text.includes('迷幻')) return text;
+  const count = (text.match(/迷幻/g) || []).length;
+  log(`  ↳ rewrote 迷幻→啟靈 ${count}× in ${label}`);
+  return text.replaceAll('迷幻', '啟靈');
+}
 
-  let assetId = null;
+async function deletePostBySlug(slug) {
+  const find = await db.execute({
+    sql: 'SELECT id, title, featured_image_path FROM posts WHERE slug = ?',
+    args: [slug],
+  });
+  if (find.rows.length === 0) {
+    log(`No post with slug "${slug}" found.`);
+    return 0;
+  }
+  let deletedCount = 0;
+  for (const row of find.rows) {
+    const id = row.id;
+    const title = row.title;
+    const imgPath = row.featured_image_path;
+    log(`Deleting post #${id} — "${title}"`);
+    // post_stats has ON DELETE CASCADE, so a single DELETE clears both rows.
+    await db.execute({ sql: 'DELETE FROM posts WHERE id = ?', args: [id] });
+    deletedCount++;
+
+    if (imgPath && imgPath.startsWith('/images/')) {
+      const abs = path.join(REPO_ROOT, 'public', imgPath.replace(/^\//, ''));
+      await removeLocalImage(abs);
+    }
+  }
+  return deletedCount;
+}
+
+// Slugs must be UNIQUE in SQLite. If a future article shares a slug with an existing
+// one, append the publish timestamp so the INSERT succeeds rather than crashing the
+// daily run.
+async function uniqueSlug(slug) {
+  const existing = await db.execute({
+    sql: 'SELECT 1 FROM posts WHERE slug = ? LIMIT 1',
+    args: [slug],
+  });
+  if (existing.rows.length === 0) return slug;
+  const suffix = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  return `${slug}-${suffix}`;
+}
+
+async function publishToSqlite({ title, content, sourceUrl, slug, featuredImageUrl, publishedAt }) {
+  let imageDownload = null;
   if (featuredImageUrl) {
     try {
-      assetId = await uploadAsset({ imageUrl: featuredImageUrl, title, base, auth, locale });
-      log(`  ↳ featured image uploaded as asset ${assetId}`);
+      imageDownload = await downloadImageToPublic({ imageUrl: featuredImageUrl });
+      log(`  ↳ featured image saved to ${imageDownload.publicPath}`);
     } catch (e) {
-      log(`  ⚠️ featured image upload failed: ${String(e.message).slice(0, 120)} (entry will publish without it)`);
+      log(`  ⚠️ featured image download failed: ${String(e.message).slice(0, 120)} (publishing without it)`);
     }
   }
 
-  const fields = {
-    internalName: { [locale]: title },
-    slug:         { [locale]: slug },
-    title:        { [locale]: title },
-    html:         { [locale]: content },
-    sourceUrl:    { [locale]: sourceUrl },
-  };
-  if (assetId) {
-    fields.featuredImage = {
-      [locale]: { sys: { type: 'Link', linkType: 'Asset', id: assetId } },
-    };
-  }
+  const finalSlug = await uniqueSlug(slug);
+  if (finalSlug !== slug) log(`  ↳ slug "${slug}" taken — using "${finalSlug}"`);
 
-  const createRes = await fetch(`${base}/entries`, {
-    method: 'POST',
-    headers: { ...auth, 'X-Contentful-Content-Type': CONTENTFUL_TYPE },
-    body: JSON.stringify({ fields }),
-  });
-  if (!createRes.ok) {
-    if (assetId) await rollbackAsset(assetId, base, auth);
-    throw new Error(`Contentful create ${createRes.status}: ${await createRes.text()}`);
+  try {
+    const insertedPost = await db.execute({
+      sql: `INSERT INTO posts
+              (slug, title, subtitle, author_id, published_at, featured_image_path, source_url, body_html, origin, contentful_id)
+            VALUES (?, ?, NULL, NULL, ?, ?, ?, ?, 'rss', NULL)`,
+      args: [
+        finalSlug,
+        title,
+        publishedAt,
+        imageDownload?.publicPath ?? null,
+        sourceUrl,
+        content,
+      ],
+    });
+    const postId = Number(insertedPost.lastInsertRowid);
+    await db.execute({ sql: 'INSERT INTO post_stats (post_id) VALUES (?)', args: [postId] });
+    return { postId, slug: finalSlug };
+  } catch (e) {
+    if (imageDownload) await removeLocalImage(imageDownload.destPath);
+    throw e;
   }
-  const entry = await createRes.json();
-
-  const pubRes = await fetch(`${base}/entries/${entry.sys.id}/published`, {
-    method: 'PUT',
-    headers: { ...auth, 'X-Contentful-Version': String(entry.sys.version) },
-  });
-  if (!pubRes.ok) {
-    // Roll back orphan draft + uploaded asset so retries don't accumulate junk.
-    await fetch(`${base}/entries/${entry.sys.id}`, {
-      method: 'DELETE',
-      headers: { ...auth, 'X-Contentful-Version': String(entry.sys.version) },
-    }).catch(() => {});
-    if (assetId) await rollbackAsset(assetId, base, auth);
-    throw new Error(`Contentful publish ${pubRes.status}: ${await pubRes.text()}`);
-  }
-  return entry.sys.id;
 }
 
 function formatTelegram(title, content, link) {
@@ -453,7 +500,7 @@ async function sendTelegram(botToken, chatId, threadId, html, link) {
     body: JSON.stringify(body),
   });
   if (!res.ok) {
-    // Don't abort the run on Telegram failure — Contentful already published.
+    // Don't abort the run on Telegram failure — the SQLite row is already in.
     console.error(`Telegram ${chatId} error: ${res.status} ${await res.text()}`);
   }
 }
@@ -511,20 +558,48 @@ async function main() {
 
   if (DELETE_MODE) {
     log(`DELETE MODE — slug: "${DELETE_SLUG}"`);
-    const n = await deleteEntryBySlug(DELETE_SLUG);
-    log(`✅ Done. ${n} entr${n === 1 ? 'y' : 'ies'} deleted.`);
+    const n = await deletePostBySlug(DELETE_SLUG);
+    log(`✅ Done. ${n} post${n === 1 ? '' : 's'} deleted.`);
+    return;
+  }
+
+  if (DRY_RUN_MODE) {
+    log(`DRY RUN — feed: ${DRY_RUN_FEED}`);
+    log('Translates the latest item and prints the preview. No DB write, no Telegram, no state save.');
+    const feed = await parser.parseURL(DRY_RUN_FEED);
+    const item = feed.items?.[0];
+    if (!item) throw new Error('Feed has no items.');
+    log(`Latest item: "${item.title}"`);
+    const { html: srcHtml, featuredImageUrl } = await extractContentFor(item);
+    const translated = await translate(item.title, srcHtml);
+    translated.title = applyPsychedelicRewrite(translated.title, 'title');
+    translated.content = applyPsychedelicRewrite(translated.content, 'body');
+    const slug = slugify(item.title);
+    const tgText = stripHtml(translated.content);
+    const sep = '─'.repeat(60);
+    console.log(`\n${sep}\nDRY-RUN PREVIEW (nothing was published or sent)\n${sep}`);
+    console.log(`Title          : ${translated.title}`);
+    console.log(`Slug           : ${slug}`);
+    console.log(`Source URL     : ${item.link}`);
+    console.log(`Featured image : ${featuredImageUrl || '(none)'}`);
+    console.log(`Site URL       : /${slug}`);
+    console.log(`\n${sep}\nBODY HTML (posts.body_html)\n${sep}\n${translated.content}`);
+    console.log(`\n${sep}\nTELEGRAM PLAIN TEXT\n${sep}\n${tgText}`);
+    console.log(`\n${sep}`);
     return;
   }
 
   if (TEST_MODE) {
     log(`TEST MODE — feed: ${TEST_TELEGRAM_FEED}`);
-    log('Will broadcast latest item to all configured Telegram chats. No Contentful, no state save.');
+    log('Will broadcast latest item to all configured Telegram chats. No DB write, no state save.');
     const feed = await parser.parseURL(TEST_TELEGRAM_FEED);
     const item = feed.items?.[0];
     if (!item) throw new Error('Feed has no items.');
     log(`Latest item: "${item.title}"`);
     const { html: srcHtml } = await extractContentFor(item);
     const translated = await translate(item.title, srcHtml);
+    translated.title = applyPsychedelicRewrite(translated.title, 'title');
+    translated.content = applyPsychedelicRewrite(translated.content, 'body');
     const tgText = stripHtml(translated.content);
     const tgHtml = formatTelegram(translated.title, tgText, item.link);
     await broadcast(tgHtml, item.link);
@@ -538,35 +613,39 @@ async function main() {
     return;
   }
 
-  if (TEST_CONTENTFUL_MODE) {
-    log(`TEST CONTENTFUL MODE — feed: ${TEST_CONTENTFUL_FEED}`);
-    log('Will create + publish ONE Contentful entry. No Telegram, no state save.');
-    const feed = await parser.parseURL(TEST_CONTENTFUL_FEED);
+  if (TEST_DB_MODE) {
+    log(`TEST DB MODE — feed: ${TEST_DB_FEED}`);
+    log('Will create ONE post in SQLite. No Telegram, no state save.');
+    const feed = await parser.parseURL(TEST_DB_FEED);
     const item = feed.items?.[0];
     if (!item) throw new Error('Feed has no items.');
     log(`Latest item: "${item.title}"`);
     const { html: srcHtml, featuredImageUrl } = await extractContentFor(item);
     const translated = await translate(item.title, srcHtml);
+    translated.title = applyPsychedelicRewrite(translated.title, 'title');
+    translated.content = applyPsychedelicRewrite(translated.content, 'body');
     const slug = slugify(item.title);
-    const entryId = await publishToContentful({
+    const publishedAt = new Date(item.isoDate || item.pubDate || Date.now()).toISOString();
+    const { postId, slug: finalSlug } = await publishToSqlite({
       title: translated.title,
       content: translated.content,
       sourceUrl: item.link,
       slug,
       featuredImageUrl,
+      publishedAt,
     });
-    log(`✅ Contentful entry created and published.`);
-    log(`   Entry ID : ${entryId}`);
-    log(`   Slug     : ${slug}`);
+    log(`✅ Post inserted into SQLite.`);
+    log(`   Post ID  : ${postId}`);
+    log(`   Slug     : ${finalSlug}`);
     log(`   Title    : ${translated.title}`);
     log(`   Source   : ${item.link}`);
-    log(`   Site URL : /html-posts/${slug}  (visible after next ISR regeneration)`);
+    log(`   Site URL : /${finalSlug}  (visible after next ISR regeneration)`);
     return;
   }
 
   if (SEED_MODE) {
     log(`SEED MODE — marking all current items as seen across ${FEED_URLS.length} feed(s).`);
-    log('No translation, no Contentful entries, no Telegram messages.');
+    log('No translation, no DB writes, no Telegram messages.');
     const state = await loadState();
     const seen = new Set(state.seen);
     const before = seen.size;
@@ -619,12 +698,15 @@ async function main() {
 
   if (newItems.length === 0) {
     log('No new items.');
+    notifyMac('🍄 Microdose daily', `今天沒有新文章（掃了 ${FEED_URLS.length} 個 feed，0 篇發佈）`);
     return;
   }
 
   log(`${newItems.length} new item(s) to evaluate.`);
   if (KEYWORD_RE) log(`Keyword filter active: ${KEYWORDS.length} terms.`);
 
+  let publishedCount = 0;
+  let failedCount = 0;
   for (const item of newItems) {
     const id = item.guid || item.link;
 
@@ -640,27 +722,53 @@ async function main() {
       `Processing [${item._feedTitle}]${matched ? ` (matched "${matched}")` : ''}: ${item.title}`,
     );
 
-    const { html: srcHtml, featuredImageUrl } = await extractContentFor(item);
-    const translated = await translate(item.title, srcHtml);
-    const slug = slugify(item.title);
+    // Isolate each item: one failure (e.g. a bad Gemini response) must not abort
+    // the whole batch and strand the items queued behind it. On error we log +
+    // notify but deliberately DON'T mark the item seen, so the next run retries it.
+    try {
+      const { html: srcHtml, featuredImageUrl } = await extractContentFor(item);
+      const translated = await translate(item.title, srcHtml);
+      translated.title = applyPsychedelicRewrite(translated.title, 'title');
+      translated.content = applyPsychedelicRewrite(translated.content, 'body');
+      const slug = slugify(item.title);
+      const publishedAt = new Date(item.isoDate || item.pubDate || Date.now()).toISOString();
 
-    await publishToContentful({
-      title: translated.title,
-      content: translated.content,
-      sourceUrl: item.link,
-      slug,
-      featuredImageUrl,
-    });
-    log(`  Contentful: published "${slug}"`);
+      const { slug: finalSlug } = await publishToSqlite({
+        title: translated.title,
+        content: translated.content,
+        sourceUrl: item.link,
+        slug,
+        featuredImageUrl,
+        publishedAt,
+      });
+      log(`  SQLite: published "${finalSlug}"`);
 
-    const tgText = stripHtml(translated.content);
-    const tgHtml = formatTelegram(translated.title, tgText, item.link);
-    await broadcast(tgHtml, item.link);
-    log(`  Telegram: sent`);
+      const tgText = stripHtml(translated.content);
+      const tgHtml = formatTelegram(translated.title, tgText, item.link);
+      await broadcast(tgHtml, item.link);
+      log(`  Telegram: sent`);
 
-    seen.add(id);
-    await saveState({ seen: Array.from(seen).slice(-2000) });
-    log(`  ✅ Done`);
+      seen.add(id);
+      await saveState({ seen: Array.from(seen).slice(-2000) });
+      publishedCount++;
+      log(`  ✅ Done`);
+    } catch (e) {
+      failedCount++;
+      log(`  ❌ Failed (will retry next run): ${String(e.message).slice(0, 200)}`);
+    }
+  }
+
+  if (publishedCount === 0 && failedCount === 0) {
+    notifyMac(
+      '🍄 Microdose daily',
+      `今天有 ${newItems.length} 篇新項目，但全被關鍵字過濾，0 篇發佈`,
+    );
+  }
+  if (failedCount > 0) {
+    notifyMac(
+      '🍄 Microdose daily ⚠️',
+      `今天發佈 ${publishedCount} 篇，但有 ${failedCount} 篇失敗（已記錄，明天重試）`,
+    );
   }
 }
 
@@ -668,5 +776,11 @@ main()
   .then(() => process.exit(0))
   .catch((err) => {
     console.error('Fatal:', err);
+    if (IS_PRODUCTION_RUN) {
+      notifyMac(
+        '🍄 Microdose daily ⚠️',
+        `今天執行失敗：${String(err?.message || err).slice(0, 150)}`,
+      );
+    }
     process.exit(1);
   });

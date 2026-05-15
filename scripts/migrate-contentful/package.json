@@ -1,0 +1,17 @@
+{
+  "name": "migrate-contentful",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "One-off migration: Contentful export JSON -> SQLite + public/images. Standalone, not part of the Next app.",
+  "scripts": {
+    "dry": "node migrate.mjs --dry-run",
+    "dry-one-each": "node migrate.mjs --dry-run --sample"
+  },
+  "dependencies": {
+    "@contentful/rich-text-html-renderer": "^17.0.0",
+    "@contentful/rich-text-types": "^17.0.0",
+    "better-sqlite3": "^11.3.0",
+    "marked": "^14.1.3"
+  }
+}
