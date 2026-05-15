@@ -145,3 +145,8 @@ Optimized for Vercel and Netlify with:
 - PWA capabilities via `next-pwa`
 
 Always run `yarn type-check` and `yarn lint` before commits to ensure code quality.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
