@@ -33,8 +33,8 @@ const App = ({ Component, pageProps }: AppProps) => {
   const issoUrl = process.env.NEXT_PUBLIC_ISSO_URL;
   const issoLang = getIssoLanguage(locale || 'zh-Hant-TW');
 
-  // GA4 is loaded once in _document; here we send a page_view on each client-side
-  // navigation, which the pages router does without a full reload.
+  // GA4 is loaded below via next/script. Here we send a page_view on each
+  // client-side navigation, which the pages router does without a full reload.
   useEffect(() => {
     if (!GA_ID) return;
     const handleRouteChange = (url: string) => {
@@ -46,6 +46,22 @@ const App = ({ Component, pageProps }: AppProps) => {
 
   return (
     <ThemeProvider>
+      {GA_ID && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script id="gtag-init" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_ID}', { page_path: window.location.pathname });
+            `}
+          </Script>
+        </>
+      )}
       {issoUrl && (
         <Script
           src={`${issoUrl}/js/embed.min.js`}
