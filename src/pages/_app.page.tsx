@@ -4,10 +4,17 @@ import { Urbanist } from 'next/font/google';
 import './utils/globals.css';
 import { useRouter } from 'next/router';
 import Script from 'next/script';
+import { useEffect } from 'react';
 
 import { Layout } from '@src/components/templates/layout';
 import { ThemeProvider } from '@src/contexts/ThemeContext';
 const urbanist = Urbanist({ subsets: ['latin'], variable: '--font-urbanist' });
+
+const GA_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS;
+
+type GtagWindow = Window & {
+  gtag?: (command: string, targetId: string, config?: Record<string, unknown>) => void;
+};
 
 // Map Next.js locales to Isso supported languages.
 const getIssoLanguage = (locale: string) => {
@@ -21,9 +28,21 @@ const getIssoLanguage = (locale: string) => {
 };
 
 const App = ({ Component, pageProps }: AppProps) => {
-  const { locale } = useRouter();
+  const router = useRouter();
+  const { locale } = router;
   const issoUrl = process.env.NEXT_PUBLIC_ISSO_URL;
   const issoLang = getIssoLanguage(locale || 'zh-Hant-TW');
+
+  // GA4 is loaded once in _document; here we send a page_view on each client-side
+  // navigation, which the pages router does without a full reload.
+  useEffect(() => {
+    if (!GA_ID) return;
+    const handleRouteChange = (url: string) => {
+      (window as GtagWindow).gtag?.('config', GA_ID, { page_path: url });
+    };
+    router.events.on('routeChangeComplete', handleRouteChange);
+    return () => router.events.off('routeChangeComplete', handleRouteChange);
+  }, [router.events]);
 
   return (
     <ThemeProvider>
